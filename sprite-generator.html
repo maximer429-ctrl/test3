@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Troup'O Invaders - Sprite Generator</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #0f0;
+            padding: 20px;
+        }
+        h1 { text-align: center; }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .sprite-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .sprite-item {
+            background: #000;
+            border: 2px solid #0f0;
+            padding: 15px;
+            text-align: center;
+        }
+        canvas {
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            background: #000;
+            border: 1px solid #333;
+            margin: 10px 0;
+        }
+        button {
+            background: #0f0;
+            color: #000;
+            border: none;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0c0;
+        }
+        .controls {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .controls button {
+            padding: 15px 30px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Troup'O Invaders - Sprite Generator</h1>
+        <p style="text-align: center;">Generate all game sprites as PNG files</p>
+        
+        <div class="controls">
+            <button onclick="generateAll()">Generate All Sprites</button>
+            <button onclick="downloadAll()">Download All as ZIP</button>
+        </div>
+        
+        <div class="sprite-grid" id="spriteGrid"></div>
+    </div>
+
+    <script>
+        const sprites = {};
+        
+        // Sprite definitions
+        const spriteData = {
+            'player': {
+                width: 40,
+                height: 30,
+                scale: 4,
+                color: '#00ff00',
+                pixels: [
+                    '....XXXX....',
+                    '...XXXXXX...',
+                    '..XXXXXXXX..',
+                    '.XXXXXXXXXX.',
+                    'XXXXXXXXXXXX',
+                    'XXXXXXXXXXXX',
+                    'XXXXXXXXXXXX',
+                    'XX.XXXX.XX'
+                ]
+            },
+            'enemy1': {
+                width: 30,
+                height: 30,
+                scale: 4,
+                color: '#ff0000',
+                pixels: [
+                    '..XXXXXX..',
+                    '.XXXXXXXX.',
+                    'XXXXXXXXXX',
+                    'XX.XX.XX.X',
+                    'XXXXXXXXXX',
+                    '..X....X..',
+                    '.X.X..X.X.',
+                    'X..X..X..X'
+                ]
+            },
+            'enemy2': {
+                width: 30,
+                height: 30,
+                scale: 4,
+                color: '#ff8800',
+                pixels: [
+                    '...X..X...',
+                    '....XX....',
+                    '..XXXXXX..',
+                    '.XX.XX.XX.',
+                    'XXXXXXXXXX',
+                    'X.XXXXXX.X',
+                    'X.X....X.X',
+                    '...XX.XX..'
+                ]
+            },
+            'enemy3': {
+                width: 30,
+                height: 30,
+                scale: 4,
+                color: '#cc00cc',
+                pixels: [
+                    '..XX..XX..',
+                    '...XXXX...',
+                    '..XXXXXX..',
+                    '.XX.XX.XX.',
+                    'XXXXXXXXXX',
+                    '..X.XX.X..',
+                    '.X......X.',
+                    '..X....X..'
+                ]
+            },
+            'bullet-player': {
+                width: 4,
+                height: 12,
+                scale: 4,
+                color: '#00ff00',
+                pixels: [
+                    'XXX',
+                    'XXX',
+                    'XXX'
+                ]
+            },
+            'bullet-enemy': {
+                width: 4,
+                height: 12,
+                scale: 4,
+                color: '#ff0000',
+                pixels: [
+                    'XXX',
+                    'XXX',
+                    'XXX'
+                ]
+            },
+            'shield': {
+                width: 60,
+                height: 40,
+                scale: 4,
+                color: '#0088ff',
+                pixels: [
+                    '....XXXXXXXX....',
+                    '...XXXXXXXXXX...',
+                    '..XXXXXXXXXXXX..',
+                    '.XXXXXXXXXXXXXX.',
+                    'XXXXXXXXXXXXXXXX',
+                    'XXXXXXXXXXXXXXXX',
+                    'XXXXXXXXXXXXXXXX',
+                    'XXXXXXXXXXXXXXXX',
+                    'XXXXXXXXXXXXXXXX',
+                    'XXX..........XXX'
+                ]
+            },
+            'ufo': {
+                width: 40,
+                height: 20,
+                scale: 4,
+                color: '#ffff00',
+                pixels: [
+                    '....XXXX....',
+                    '..XXXXXXXX..',
+                    '.XXXXXXXXXX.',
+                    'XX.XX.XX.XX.',
+                    'XXXXXXXXXXXX',
+                    '..X.X..X.X..'
+                ]
+            },
+            'explosion1': {
+                width: 32,
+                height: 32,
+                scale: 4,
+                color: '#ff8800',
+                pixels: [
+                    '...X....X...',
+                    '.X..XX.X...X',
+                    '..X.XX.XX.X.',
+                    'X..XXXXXX..X',
+                    '...XXXXXX...',
+                    '..XXXXXXXX..',
+                    '..XXXXXXXX..',
+                    '.X.XXXXXX.X.',
+                    'X..X.XX.X..X',
+                    '...X....X...'
+                ]
+            },
+            'explosion2': {
+                width: 32,
+                height: 32,
+                scale: 4,
+                color: '#ff4400',
+                pixels: [
+                    'X.........X.',
+                    '..X.....X...',
+                    '....X.X.....',
+                    '..X.XXX.X...',
+                    '...XXXXX....',
+                    '..XXXXXXX...',
+                    '..X.XXX.X...',
+                    '....X.X.....',
+                    '..X.....X...',
+                    'X.........X.'
+                ]
+            }
+        };
+
+        function drawPixelArt(ctx, pixels, scale, color) {
+            ctx.fillStyle = color;
+            const height = pixels.length;
+            const width = Math.max(...pixels.map(row => row.length));
+            
+            for (let y = 0; y < pixels.length; y++) {
+                const row = pixels[y];
+                for (let x = 0; x < row.length; x++) {
+                    if (row[x] === 'X') {
+                        ctx.fillRect(x * scale, y * scale, scale, scale);
+                    }
+                }
+            }
+        }
+
+        function generateSprite(name, data) {
+            const canvas = document.createElement('canvas');
+            const pixelWidth = Math.max(...data.pixels.map(row => row.length));
+            const pixelHeight = data.pixels.length;
+            
+            canvas.width = pixelWidth * data.scale;
+            canvas.height = pixelHeight * data.scale;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawPixelArt(ctx, data.pixels, data.scale, data.color);
+            
+            sprites[name] = canvas;
+            return canvas;
+        }
+
+        function displaySprite(name, canvas) {
+            const grid = document.getElementById('spriteGrid');
+            const item = document.createElement('div');
+            item.className = 'sprite-item';
+            
+            const title = document.createElement('h3');
+            title.textContent = name;
+            item.appendChild(title);
+            
+            const displayCanvas = canvas.cloneNode();
+            displayCanvas.getContext('2d').drawImage(canvas, 0, 0);
+            displayCanvas.style.width = (canvas.width * 2) + 'px';
+            displayCanvas.style.height = (canvas.height * 2) + 'px';
+            item.appendChild(displayCanvas);
+            
+            const info = document.createElement('div');
+            info.textContent = `${canvas.width}x${canvas.height}px`;
+            info.style.fontSize = '12px';
+            info.style.color = '#888';
+            item.appendChild(info);
+            
+            const btn = document.createElement('button');
+            btn.textContent = 'Download';
+            btn.onclick = () => downloadSprite(name, canvas);
+            item.appendChild(btn);
+            
+            grid.appendChild(item);
+        }
+
+        function downloadSprite(name, canvas) {
+            canvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${name}.png`;
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        }
+
+        function generateAll() {
+            const grid = document.getElementById('spriteGrid');
+            grid.innerHTML = '';
+            
+            for (const [name, data] of Object.entries(spriteData)) {
+                const canvas = generateSprite(name, data);
+                displaySprite(name, canvas);
+            }
+            
+            console.log('All sprites generated!');
+        }
+
+        async function downloadAll() {
+            if (Object.keys(sprites).length === 0) {
+                alert('Please generate sprites first!');
+                return;
+            }
+            
+            // Download each sprite individually (browser limitation for ZIP)
+            for (const [name, canvas] of Object.entries(sprites)) {
+                await new Promise(resolve => {
+                    downloadSprite(name, canvas);
+                    setTimeout(resolve, 200);
+                });
+            }
+            
+            alert(`Downloaded ${Object.keys(sprites).length} sprites!`);
+        }
+
+        // Generate on load
+        window.onload = generateAll;
+    </script>
+</body>
+</html>

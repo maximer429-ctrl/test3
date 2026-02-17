@@ -72,19 +72,22 @@ class Game {
             projectionMatrix
         );
         
-        // Initialize other systems as they become available
+        // Initialize texture manager and load sprites
+        this.textureManager = new TextureManager(this.gl);
+        await this.textureManager.loadSpriteAtlas('assets/sprite-atlas.json');
+        
         // Initialize sprite renderer
         this.spriteRenderer = new SpriteRenderer(this.gl, this.shaderProgram);
         
-        // Create a test sprite to verify rendering works
+        // Create test sprites with textures
         this.testSprites = [
-            new Sprite(100, 100, 40, 40, CONFIG.COLORS.PLAYER),
-            new Sprite(200, 150, 30, 30, CONFIG.COLORS.ENEMY_1),
-            new Sprite(300, 200, 30, 30, CONFIG.COLORS.ENEMY_2),
-            new Sprite(400, 250, 30, 30, CONFIG.COLORS.ENEMY_3),
+            this.createTexturedSprite('player', 100, 100),
+            this.createTexturedSprite('enemy1', 200, 150),
+            this.createTexturedSprite('enemy2', 300, 200),
+            this.createTexturedSprite('enemy3', 400, 250),
+            this.createTexturedSprite('ufo', 500, 100),
         ];
         
-        // TODO: Initialize texture manager (test3-hmq)
         // TODO: Initialize input manager (test3-724)
         // TODO: Initialize collision manager (test3-5ag)
         // TODO: Initialize game state manager (test3-h3q)
@@ -92,6 +95,27 @@ class Game {
         
         console.log('Game systems initialized');
         return true;
+    }
+    
+    /**
+     * Helper to create a sprite with texture from sprite atlas
+     * @param {string} spriteName - Name from sprite atlas
+     * @param {number} x - X position
+     * @param {number} y - Y position
+     * @returns {Sprite}
+     */
+    createTexturedSprite(spriteName, x, y) {
+        const spriteData = this.textureManager.getSpriteData(spriteName);
+        const texture = this.textureManager.getTexture(spriteName);
+        
+        if (!spriteData || !texture) {
+            console.warn(`Sprite not found: ${spriteName}`);
+            return new Sprite(x, y, 30, 30, [1, 0, 1, 1]); // Fallback magenta sprite
+        }
+        
+        const sprite = new Sprite(x, y, spriteData.width, spriteData.height, [1, 1, 1, 1]);
+        sprite.texture = texture;
+        return sprite;
     }
     
     async start() {
