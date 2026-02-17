@@ -36,6 +36,21 @@ This project uses Docker for a containerized development environment.
 
 The container mounts the current directory, so any changes you make to the source files will be immediately available. Just refresh your browser to see updates.
 
+**⚠️ Important: Running npm commands**
+
+If you need to run npm commands (like installing new dependencies or running sprite packer), always run them inside the Docker container:
+
+```bash
+# Run commands inside container
+docker-compose exec troupo-invaders npm install
+docker-compose exec troupo-invaders npm run pack-sprites
+docker-compose exec troupo-invaders node generate-spritesheet.js
+
+# NOT on your host machine - native dependencies may fail
+```
+
+The project uses packages with native C++ dependencies (like `canvas` for sprite packing) that require system libraries pre-installed in the Docker container.
+
 ### Manual Docker Commands
 
 If you prefer not to use docker-compose:
