@@ -88,6 +88,8 @@ class Game {
             this.createTexturedSprite('ufo', 500, 100),
         ];
         
+        console.log(`✓ Created ${this.testSprites.length} test sprites`);
+        
         // TODO: Initialize input manager (test3-724)
         // TODO: Initialize collision manager (test3-5ag)
         // TODO: Initialize game state manager (test3-h3q)
@@ -122,7 +124,14 @@ class Game {
         console.log('Game starting...');
         
         // Wait for initialization to complete
-        await this.initializePromise;
+        const initialized = await this.initializePromise;
+        
+        if (!initialized) {
+            console.error('Game initialization failed, cannot start');
+            return;
+        }
+        
+        console.log('Game initialized successfully, starting game loop...');
         this.isRunning = true;
         this.lastTime = performance.now();
         this.gameLoop(this.lastTime);
@@ -159,13 +168,15 @@ class Game {
     }
     
     render() {
-        if (!this.webglContext || !this.gl || !this.spriteRenderer) return;
+        if (!this.webglContext || !this.gl || !this.spriteRenderer) {
+            return;
+        }
         
         // Clear the screen
         this.webglContext.clear();
         
         // Render test sprites
-        if (this.testSprites) {
+        if (this.testSprites && this.testSprites.length > 0) {
             this.spriteRenderer.render(this.testSprites);
         }
         

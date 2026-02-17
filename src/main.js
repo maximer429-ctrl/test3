@@ -20,9 +20,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize the game
     try {
         const game = new Game(canvas);
-        game.start();
-        console.log('Game started successfully');
+        game.start().catch(error => {
+            console.error('Failed to start game:', error);
+        });
+        console.log('Game initialization started...');
     } catch (error) {
-        console.error('Failed to start game:', error);
+        console.error('Failed to create game:', error);
     }
 });

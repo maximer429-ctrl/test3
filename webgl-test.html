@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebGL Test</title>
+    <style>
+        body { background: #000; color: #0f0; font-family: monospace; padding: 20px; }
+        canvas { border: 2px solid #0f0; display: block; margin: 20px auto; }
+        #log { max-width: 800px; margin: 0 auto; }
+    </style>
+</head>
+<body>
+    <h1>WebGL Sprite Test</h1>
+    <canvas id="test-canvas" width="800" height="600"></canvas>
+    <div id="log"></div>
+
+    <script>
+        function log(msg) {
+            const logDiv = document.getElementById('log');
+            logDiv.innerHTML += msg + '<br>';
+            console.log(msg);
+        }
+
+        const canvas = document.getElementById('test-canvas');
+        const gl = canvas.getContext('webgl');
+        
+        if (!gl) {
+            log('ERROR: WebGL not supported');
+        } else {
+            log('✓ WebGL context created');
+            
+            // Clear screen with blue
+            gl.clearColor(0.0, 0.0, 0.5, 1.0);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            log('✓ Screen cleared to blue');
+            
+            // Draw a simple colored quad using immediate mode vertices
+            const vertexShaderSource = `
+                attribute vec2 a_position;
+                void main() {
+                    gl_Position = vec4(a_position, 0.0, 1.0);
+                }
+            `;
+            
+            const fragmentShaderSource = `
+                precision mediump float;
+                void main() {
+                    gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);
+                }
+            `;
+            
+            // Compile shaders
+            const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+            gl.shaderSource(vertexShader, vertexShaderSource);
+            gl.compileShader(vertexShader);
+            
+            if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
+                log('ERROR: Vertex shader compilation failed');
+                log(gl.getShaderInfoLog(vertexShader));
+            } else {
+                log('✓ Vertex shader compiled');
+            }
+            
+            const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+            gl.shaderSource(fragmentShader, fragmentShaderSource);
+            gl.compileShader(fragmentShader);
+            
+            if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
+                log('ERROR: Fragment shader compilation failed');
+                log(gl.getShaderInfoLog(fragmentShader));
+            } else {
+                log('✓ Fragment shader compiled');
+            }
+            
+            const program = gl.createProgram();
+            gl.attachShader(program, vertexShader);
+            gl.attachShader(program, fragmentShader);
+            gl.linkProgram(program);
+            
+            if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+                log('ERROR: Program linking failed');
+                log(gl.getProgramInfoLog(program));
+            } else {
+                log('✓ Shader program linked');
+            }
+            
+            gl.useProgram(program);
+            
+            // Create a simple square
+            const vertices = new Float32Array([
+                -0.5, -0.5,
+                 0.5, -0.5,
+                -0.5,  0.5,
+                 0.5,  0.5
+            ]);
+            
+            const buffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+            gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+            
+            const positionLocation = gl.getAttribLocation(program, 'a_position');
+            gl.enableVertexAttribArray(positionLocation);
+            gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+            
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            log('✓ Drew green square');
+            log(' ');
+            log('If you see a blue background with a green square, WebGL is working!');
+        }
+    </script>
+</body>
+</html>
