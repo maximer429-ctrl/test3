@@ -111,76 +111,138 @@ function fillRect(pixels, width, x, y, w, h, r, g, b, a = 255) {
 
 /**
  * Create sheep enemy sprite (Enemy 1 - 10 points)
- * Cute fluffy sheep with better pixel art
+ * Enhanced cartoon-style fluffy sheep with improved pixel art
  */
 function createSheep() {
   const size = 30;
   const pixels = new Uint8Array(size * size * 4);
   
-  // Define colors
-  const bodyColor = [245, 245, 250];      // White wool
-  const faceColor = [50, 45, 45];          // Dark gray/black face
-  const legColor = [50, 45, 45];           // Black legs
-  const outlineColor = [200, 200, 210];    // Light outline for wool
-  const eyeColor = [255, 255, 255];        // White eyes
-  const pupilColor = [0, 0, 0];            // Black pupils
+  // Enhanced color palette with shading
+  const woolLight = [255, 255, 255];       // Brightest highlights
+  const woolMain = [240, 240, 245];        // Main wool color
+  const woolMid = [220, 220, 230];         // Mid-tone wool
+  const woolDark = [195, 195, 210];        // Shadow wool
+  const woolOutline = [170, 170, 190];     // Darker outline
+  const faceBlack = [40, 35, 35];          // Very dark face
+  const faceMid = [55, 50, 50];            // Face highlight
+  const legBlack = [35, 30, 30];           // Legs
+  const eyeWhite = [255, 255, 255];        // Eye whites
+  const eyeBlue = [200, 220, 255];         // Eye shine
+  const pupil = [0, 0, 0];                 // Pupils
+  const nosePink = [255, 180, 180];        // Pink nose
+  const noseDark = [200, 140, 140];        // Nose shadow
   
-  // Fluffy wool body - more organic cloud shape
-  // Main body mass
-  fillRect(pixels, size, 9, 13, 12, 8, ...bodyColor);
+  // === FLUFFY WOOL BODY with gradients ===
+  // Main body core
+  fillRect(pixels, size, 9, 14, 12, 7, ...woolMain);
   
-  // Top fluff (rounded)
-  fillRect(pixels, size, 10, 11, 10, 2, ...bodyColor);
-  fillRect(pixels, size, 11, 10, 8, 1, ...bodyColor);
+  // Top wool poof (larger, rounder)
+  fillRect(pixels, size, 10, 11, 10, 3, ...woolMain);
+  fillRect(pixels, size, 11, 9, 8, 2, ...woolMain);
+  fillRect(pixels, size, 12, 8, 6, 1, ...woolMid);
   
-  // Bottom fluff
-  fillRect(pixels, size, 10, 21, 10, 1, ...bodyColor);
+  // Bottom wool
+  fillRect(pixels, size, 10, 21, 10, 1, ...woolMain);
+  fillRect(pixels, size, 11, 22, 8, 1, ...woolMid);
   
   // Side fluffs for roundness
-  fillRect(pixels, size, 8, 14, 1, 6, ...bodyColor);
-  fillRect(pixels, size, 21, 14, 1, 6, ...bodyColor);
-  fillRect(pixels, size, 7, 15, 1, 4, ...bodyColor);
-  fillRect(pixels, size, 22, 15, 1, 4, ...bodyColor);
+  fillRect(pixels, size, 8, 15, 1, 5, ...woolMain);
+  fillRect(pixels, size, 21, 15, 1, 5, ...woolMain);
+  fillRect(pixels, size, 7, 16, 1, 3, ...woolMid);
+  fillRect(pixels, size, 22, 16, 1, 3, ...woolMid);
   
-  // Add wool texture with lighter pixels
-  setPixel(pixels, size, 11, 13, 255, 255, 255);
-  setPixel(pixels, size, 13, 15, 255, 255, 255);
-  setPixel(pixels, size, 17, 14, 255, 255, 255);
-  setPixel(pixels, size, 15, 18, 255, 255, 255);
-  setPixel(pixels, size, 19, 17, 255, 255, 255);
+  // === WOOL SHADING (top-left light source) ===
+  // Highlights (top-left)
+  setPixel(pixels, size, 10, 11, ...woolLight);
+  setPixel(pixels, size, 11, 11, ...woolLight);
+  setPixel(pixels, size, 11, 9, ...woolLight);
+  setPixel(pixels, size, 12, 9, ...woolLight);
+  setPixel(pixels, size, 10, 14, ...woolLight);
+  setPixel(pixels, size, 11, 14, ...woolLight);
+  setPixel(pixels, size, 12, 15, ...woolLight);
+  
+  // Mid-tones for volume
+  fillRect(pixels, size, 13, 12, 4, 2, ...woolMid);
+  fillRect(pixels, size, 11, 16, 3, 2, ...woolMid);
+  
+  // Shadows (bottom-right)
+  fillRect(pixels, size, 17, 18, 3, 2, ...woolDark);
+  fillRect(pixels, size, 15, 19, 4, 2, ...woolDark);
+  setPixel(pixels, size, 19, 17, ...woolDark);
+  setPixel(pixels, size, 20, 17, ...woolDark);
+  setPixel(pixels, size, 20, 18, ...woolDark);
   
   // Wool outline for definition
+  // Top outline
+  for (let x = 12; x < 18; x++) {
+    setPixel(pixels, size, x, 8, ...woolOutline);
+  }
+  // Bottom outline
   for (let x = 11; x < 19; x++) {
-    setPixel(pixels, size, x, 10, ...outlineColor);
+    setPixel(pixels, size, x, 22, ...woolOutline);
   }
-  for (let x = 10; x < 20; x++) {
-    setPixel(pixels, size, x, 21, ...outlineColor);
-  }
+  // Left outline
+  setPixel(pixels, size, 7, 16, ...woolOutline);
+  setPixel(pixels, size, 7, 17, ...woolOutline);
+  setPixel(pixels, size, 8, 15, ...woolOutline);
+  setPixel(pixels, size, 8, 19, ...woolOutline);
+  // Right outline
+  setPixel(pixels, size, 22, 16, ...woolOutline);
+  setPixel(pixels, size, 22, 17, ...woolOutline);
+  setPixel(pixels, size, 21, 19, ...woolOutline);
   
-  // Black/dark face (more rectangular, sheep-like)
-  fillRect(pixels, size, 11, 7, 8, 6, ...faceColor);
+  // === HEAD & FACE ===
+  // Main black face
+  fillRect(pixels, size, 11, 6, 8, 7, ...faceBlack);
   
-  // Ears sticking out from head
-  fillRect(pixels, size, 9, 8, 2, 3, ...faceColor);
-  fillRect(pixels, size, 19, 8, 2, 3, ...faceColor);
+  // Face shading/highlight (left side lighter)
+  setPixel(pixels, size, 11, 7, ...faceMid);
+  setPixel(pixels, size, 11, 8, ...faceMid);
+  setPixel(pixels, size, 12, 6, ...faceMid);
   
-  // Eyes (white with black pupils - classic sheep look)
-  fillRect(pixels, size, 13, 9, 2, 2, ...eyeColor);
-  fillRect(pixels, size, 16, 9, 2, 2, ...eyeColor);
-  setPixel(pixels, size, 13, 10, ...pupilColor);
-  setPixel(pixels, size, 16, 10, ...pupilColor);
+  // Cute rounded ears
+  fillRect(pixels, size, 9, 7, 2, 4, ...faceBlack);
+  fillRect(pixels, size, 19, 7, 2, 4, ...faceBlack);
+  // Ear highlights
+  setPixel(pixels, size, 9, 8, ...faceMid);
+  setPixel(pixels, size, 19, 8, ...faceMid);
   
-  // Nose/snout
-  setPixel(pixels, size, 14, 11, 100, 90, 90);
-  setPixel(pixels, size, 15, 11, 100, 90, 90);
+  // === EXPRESSIVE EYES ===
+  // Larger, rounder eyes with sparkle
+  fillRect(pixels, size, 12, 8, 3, 3, ...eyeWhite);
+  fillRect(pixels, size, 15, 8, 3, 3, ...eyeWhite);
   
-  // Legs (thin black legs)
-  fillRect(pixels, size, 11, 22, 2, 4, ...legColor);
-  fillRect(pixels, size, 17, 22, 2, 4, ...legColor);
+  // Eye shine/highlight
+  setPixel(pixels, size, 12, 8, ...eyeBlue);
+  setPixel(pixels, size, 15, 8, ...eyeBlue);
   
-  // Small fluffy tail
-  fillRect(pixels, size, 22, 17, 2, 2, ...bodyColor);
-  fillRect(pixels, size, 23, 18, 1, 1, ...bodyColor);
+  // Pupils (slightly offset for cuteness)
+  fillRect(pixels, size, 13, 9, 2, 2, ...pupil);
+  fillRect(pixels, size, 16, 9, 2, 2, ...pupil);
+  
+  // === CUTE NOSE ===
+  // Pink button nose
+  fillRect(pixels, size, 13, 11, 4, 2, ...nosePink);
+  // Nose highlight
+  setPixel(pixels, size, 13, 11, 255, 200, 200);
+  // Nose shadow
+  setPixel(pixels, size, 15, 12, ...noseDark);
+  setPixel(pixels, size, 16, 12, ...noseDark);
+  
+  // === LEGS ===
+  // Front legs (with slight shading)
+  fillRect(pixels, size, 11, 23, 2, 4, ...legBlack);
+  fillRect(pixels, size, 17, 23, 2, 4, ...legBlack);
+  // Leg highlights
+  setPixel(pixels, size, 11, 23, ...faceMid);
+  setPixel(pixels, size, 17, 23, ...faceMid);
+  
+  // === FLUFFY TAIL ===
+  // Larger, more prominent tail
+  fillRect(pixels, size, 22, 16, 3, 3, ...woolMain);
+  fillRect(pixels, size, 23, 17, 2, 2, ...woolMid);
+  setPixel(pixels, size, 22, 16, ...woolLight);
+  setPixel(pixels, size, 24, 18, ...woolDark);
   
   createPNG(size, size, pixels, 'sheep-enemy.png');
   return { name: 'sheep-enemy', width: size, height: size, points: 10 };
