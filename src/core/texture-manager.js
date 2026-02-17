@@ -108,13 +108,24 @@ class TextureManager {
      */
     async loadIndividualSprites(basePath, atlas) {
         const sprites = atlas.sprites || {};
-        this.totalCount = Object.keys(sprites).length;
         
         // Support both v1.0 (meta.image) and v2.0 (meta.spritePath) format
         const spritePath = atlas.meta.spritePath || atlas.meta.image || 'sprites/';
         
         const loadPromises = [];
+        
+        // Count total textures to load (base sprites + animation frames)
+        let totalTextures = Object.keys(sprites).length;
+        for (const spriteData of Object.values(sprites)) {
+            if (spriteData.animation && spriteData.animation.frames) {
+                totalTextures += spriteData.animation.frames.length;
+            }
+        }
+        this.totalCount = totalTextures;
+        
+        // Load base sprites and animation frames
         for (const [name, spriteData] of Object.entries(sprites)) {
+            // Load base sprite
             const fullPath = `${basePath}${spritePath}${spriteData.file}`;
             loadPromises.push(
                 this.loadTexture(name, fullPath).catch(err => {
@@ -122,6 +133,22 @@ class TextureManager {
                     return null;
                 })
             );
+            
+            // Load animation frames if they exist
+            if (spriteData.animation && spriteData.animation.frames) {
+                for (let i = 0; i < spriteData.animation.frames.length; i++) {
+                    const frameData = spriteData.animation.frames[i];
+                    const frameName = frameData.file.replace('.png', '');
+                    const frameFullPath = `${basePath}${spritePath}${frameData.file}`;
+                    
+                    loadPromises.push(
+                        this.loadTexture(frameName, frameFullPath).catch(err => {
+                            console.warn(`Failed to load animation frame ${frameName}:`, err);
+                            return null;
+                        })
+                    );
+                }
+            }
         }
         
         await Promise.all(loadPromises);

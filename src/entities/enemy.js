@@ -19,10 +19,8 @@ class Enemy extends Sprite {
         this.col = col;
         this.points = CONFIG.ENEMY_POINTS[type] || 10;
         
-        // Animation properties
-        this.animationFrame = 0;
-        this.animationTime = 0;
-        this.animationSpeed = 0.3; // seconds per frame
+        // Animation component (initialized later with loadTexture)
+        this.animation = null;
         
         // Movement (managed by formation)
         this.formationX = x;
@@ -58,9 +56,20 @@ class Enemy extends Sprite {
         const texture = textureManager.getTexture(this.spriteName);
         
         if (spriteData && texture) {
-            this.texture = texture;
             this.width = spriteData.width;
             this.height = spriteData.height;
+            
+            // Check if sprite has animation
+            if (spriteData.animation && spriteData.animation.frames && spriteData.animation.frames.length > 0) {
+                // Create animation component
+                this.animation = new AnimationComponent(this.spriteName, spriteData.animation, textureManager);
+                // Set initial texture from animation
+                this.texture = this.animation.getCurrentTexture();
+            } else {
+                // Static sprite, no animation
+                this.texture = texture;
+                this.animation = null;
+            }
         }
     }
     
@@ -72,10 +81,10 @@ class Enemy extends Sprite {
         if (!this.alive) return;
         
         // Update animation
-        this.animationTime += deltaTime;
-        if (this.animationTime >= this.animationSpeed) {
-            this.animationTime = 0;
-            this.animationFrame = (this.animationFrame + 1) % 2; // Toggle between 0 and 1
+        if (this.animation) {
+            this.animation.update(deltaTime);
+            // Update texture to current animation frame
+            this.texture = this.animation.getCurrentTexture();
         }
         
         // Update shoot cooldown
