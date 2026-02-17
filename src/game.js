@@ -82,9 +82,9 @@ class Game {
         // Create test sprites with textures
         this.testSprites = [
             this.createTexturedSprite('player', 100, 100),
-            this.createTexturedSprite('enemy1', 200, 150),
-            this.createTexturedSprite('enemy2', 300, 200),
-            this.createTexturedSprite('enemy3', 400, 250),
+            this.createTexturedSprite('sheep-enemy', 200, 150),
+            this.createTexturedSprite('goat-enemy', 300, 200),
+            this.createTexturedSprite('alpaca-enemy', 400, 250),
             this.createTexturedSprite('ufo', 500, 100),
         ];
         
