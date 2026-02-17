@@ -1,63 +1,81 @@
 {
   "meta": {
-    "version": "1.0",
-    "image": "sprites/",
-    "format": "RGBA8888"
+    "version": "2.0",
+    "mode": "individual",
+    "format": "RGBA8888",
+    "description": "Sprite atlas configuration. Mode 'individual' loads separate PNG files. Mode 'packed' uses a single texture atlas.",
+    "spritePath": "sprites/",
+    "atlasTexture": null,
+    "atlasWidth": null,
+    "atlasHeight": null,
+    "padding": 2
   },
   "sprites": {
     "player": {
       "file": "player.png",
       "width": 40,
-      "height": 30
+      "height": 30,
+      "uv": null
     },
     "sheep-enemy": {
       "file": "sheep-enemy.png",
       "width": 30,
       "height": 30,
-      "points": 10
+      "points": 10,
+      "uv": null
     },
     "goat-enemy": {
       "file": "goat-enemy.png",
       "width": 30,
       "height": 30,
-      "points": 20
+      "points": 20,
+      "uv": null
     },
     "alpaca-enemy": {
       "file": "alpaca-enemy.png",
       "width": 30,
       "height": 30,
-      "points": 30
+      "points": 30,
+      "uv": null
     },
     "bulletPlayer": {
       "file": "bullet-player.png",
       "width": 4,
-      "height": 12
+      "height": 12,
+      "uv": null
     },
     "bulletEnemy": {
       "file": "bullet-enemy.png",
       "width": 4,
-      "height": 12
+      "height": 12,
+      "uv": null
     },
     "shield": {
       "file": "shield.png",
       "width": 60,
-      "height": 40
+      "height": 40,
+      "uv": null
     },
     "ufo": {
       "file": "ufo.png",
       "width": 40,
       "height": 20,
-      "points": 100
+      "points": 100,
+      "uv": null
     },
     "explosion1": {
       "file": "explosion1.png",
       "width": 32,
-      "height": 32
+      "height": 32,
+      "uv": null,
+      "animation": null
     },
     "explosion2": {
       "file": "explosion2.png",
       "width": 32,
-      "height": 32
+      "height": 32,
+      "uv": null,
+      "animation": null
     }
   }
 }

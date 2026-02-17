@@ -5,7 +5,8 @@
   "main": "src/main.js",
   "scripts": {
     "start": "http-server . -p 8080 -c-1",
-    "dev": "http-server . -p 8080 -c-1"
+    "dev": "http-server . -p 8080 -c-1",
+    "pack-sprites": "node generate-spritesheet.js"
   },
   "keywords": [
     "webgl",
@@ -14,6 +15,9 @@
   ],
   "author": "",
   "license": "MIT",
+  "dependencies": {
+    "canvas": "^2.11.2"
+  },
   "devDependencies": {
     "http-server": "^14.1.1"
   }

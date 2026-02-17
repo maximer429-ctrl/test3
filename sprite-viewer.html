@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Troup'O Invaders - Sprite Viewer</title>
+    <title>Sprite Atlas Viewer</title>
     <style>
         * {
             margin: 0;
@@ -12,35 +12,299 @@
         }
 
         body {
-            font-family: 'Courier New', monospace;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #1a1a1a;
             color: #e0e0e0;
-            padding: 20px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #444;
+        /* Header */
+        .header {
+            background: #252525;
+            padding: 15px 20px;
+            border-bottom: 2px solid #4CAF50;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
-        h1 {
+        .header h1 {
+            font-size: 24px;
             color: #4CAF50;
-            margin-bottom: 10px;
         }
 
-        .subtitle {
-            color: #888;
+        .atlas-mode {
+            background: #333;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #4CAF50;
+            border: 1px solid #4CAF50;
+        }
+
+        /* Main Content */
+        .main-container {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 300px;
+            background: #252525;
+            border-right: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .search-box {
+            padding: 15px;
+            border-bottom: 1px solid #333;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px;
+            background: #1a1a1a;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: #e0e0e0;
             font-size: 14px;
         }
 
-        .controls {
+        .search-box input:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .sprite-list-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .category {
+            margin-bottom: 15px;
+        }
+
+        .category-header {
+            font-weight: bold;
+            color: #4CAF50;
+            padding: 8px 10px;
+            background: #2a2a2a;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .sprite-item {
             display: flex;
-            gap: 20px;
+            align-items: center;
+            padding: 8px 10px;
+            margin: 2px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+            background: #2a2a2a;
+        }
+
+        .sprite-item:hover {
+            background: #333;
+        }
+
+        .sprite-item.active {
+            background: #4CAF50;
+            color: #1a1a1a;
+        }
+
+        .sprite-thumbnail {
+            width: 32px;
+            height: 32px;
+            margin-right: 10px;
+            background: #1a1a1a;
+            border: 1px solid #444;
+            display: flex;
+            align-items: center;
             justify-content: center;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            flex-shrink: 0;
+        }
+
+        .sprite-thumbnail canvas {
+            max-width: 100%;
+            max-height: 100%;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        .sprite-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .sprite-name {
+            font-weight: 500;
+            font-size: 13px;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sprite-dims {
+            font-size: 11px;
+            color: #888;
+        }
+
+        .sprite-item.active .sprite-dims {
+            color: #1a1a1a;
+            opacity: 0.7;
+        }
+
+        /* Detail Panel */
+        .detail-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #1a1a1a;
+            overflow: hidden;
+        }
+
+        .detail-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .empty-state {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #666;
+            font-size: 16px;
+        }
+
+        .preview-section {
+            background: #252525;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .preview-header {
+            font-size: 18px;
+            font-weight: bold;
+            color: #4CAF50;
+            margin-bottom: 15px;
+        }
+
+        .preview-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+            border-radius: 4px;
+            position: relative;
+            overflow: auto;
+        }
+
+        .preview-container.bg-dark {
+            background: #1a1a1a;
+        }
+
+        .preview-container.bg-light {
+            background: #f0f0f0;
+        }
+
+        .preview-container.bg-checker {
+            background-image: 
+                linear-gradient(45deg, #2a2a2a 25%, transparent 25%),
+                linear-gradient(-45deg, #2a2a2a 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #2a2a2a 75%),
+                linear-gradient(-45deg, transparent 75%, #2a2a2a 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+
+        .preview-canvas {
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            border: 1px solid #444;
+        }
+
+        .metadata-section {
+            background: #252525;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .metadata-header {
+            font-size: 18px;
+            font-weight: bold;
+            color: #4CAF50;
+            margin-bottom: 15px;
+        }
+
+        .metadata-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .metadata-item {
+            display: flex;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #333;
+        }
+
+        .metadata-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .metadata-label {
+            font-weight: 500;
+            color: #888;
+            min-width: 120px;
+        }
+
+        .metadata-value {
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .uv-coords {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .uv-item {
+            background: #2a2a2a;
+            padding: 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        /* Controls Bar */
+        .controls-bar {
+            background: #252525;
+            border-top: 1px solid #333;
+            padding: 15px 20px;
+            display: flex;
+            gap: 30px;
+            align-items: center;
         }
 
         .control-group {
@@ -49,389 +313,503 @@
             gap: 10px;
         }
 
-        .control-group label {
-            font-weight: bold;
-            color: #aaa;
+        .control-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #888;
         }
 
-        .control-group select,
-        .control-group input {
-            padding: 5px 10px;
-            background: #2a2a2a;
-            color: #e0e0e0;
-            border: 1px solid #444;
-            border-radius: 4px;
-            font-family: inherit;
-        }
-
-        .control-group button {
-            padding: 5px 15px;
-            background: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-family: inherit;
-            transition: background 0.3s;
-        }
-
-        .control-group button:hover {
-            background: #45a049;
-        }
-
-        .sprite-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 20px;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .sprite-card {
-            background: #2a2a2a;
-            border: 2px solid #444;
-            border-radius: 8px;
-            padding: 15px;
-            text-align: center;
-            transition: all 0.3s;
-        }
-
-        .sprite-card:hover {
-            border-color: #4CAF50;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
-        }
-
-        .sprite-container {
-            width: 100%;
-            height: 150px;
+        .zoom-buttons {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 10px;
-            border-radius: 4px;
-            position: relative;
-            overflow: hidden;
+            gap: 5px;
         }
 
-        .sprite-container.bg-dark {
-            background: #1a1a1a;
-        }
-
-        .sprite-container.bg-light {
-            background: #e0e0e0;
-        }
-
-        .sprite-container.bg-transparent {
-            background: 
-                linear-gradient(45deg, #555 25%, transparent 25%),
-                linear-gradient(-45deg, #555 25%, transparent 25%),
-                linear-gradient(45deg, transparent 75%, #555 75%),
-                linear-gradient(-45deg, transparent 75%, #555 75%);
-            background-size: 10px 10px;
-            background-position: 0 0, 0 5px, 5px -5px, -5px 0px;
-        }
-
-        .sprite-container canvas {
-            image-rendering: pixelated;
-            image-rendering: crisp-edges;
-        }
-
-        .sprite-name {
-            font-weight: bold;
-            color: #4CAF50;
-            margin-bottom: 5px;
-            font-size: 14px;
-        }
-
-        .sprite-info {
-            font-size: 12px;
-            color: #888;
-        }
-
-        .sprite-info div {
-            margin: 2px 0;
-        }
-
-        .error {
-            color: #f44336;
-            text-align: center;
-            padding: 20px;
-            background: #2a2a2a;
-            border: 2px solid #f44336;
-            border-radius: 8px;
-            margin: 20px auto;
-            max-width: 600px;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            font-size: 18px;
-            color: #4CAF50;
-        }
-
-        .stats {
-            text-align: center;
-            margin-bottom: 20px;
-            padding: 15px;
-            background: #2a2a2a;
+        .zoom-btn, .bg-btn {
+            padding: 6px 12px;
+            background: #333;
             border: 1px solid #444;
-            border-radius: 8px;
-            max-width: 800px;
-            margin: 0 auto 30px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-top: 10px;
-        }
-
-        .stat-item {
-            padding: 10px;
-            background: #1a1a1a;
             border-radius: 4px;
+            color: #e0e0e0;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
         }
 
-        .stat-value {
-            font-size: 24px;
-            color: #4CAF50;
+        .zoom-btn:hover, .bg-btn:hover {
+            background: #3a3a3a;
+            border-color: #555;
+        }
+
+        .zoom-btn.active, .bg-btn.active {
+            background: #4CAF50;
+            border-color: #4CAF50;
+            color: #1a1a1a;
             font-weight: bold;
         }
 
-        .stat-label {
-            font-size: 12px;
-            color: #888;
-            margin-top: 5px;
+        .bg-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .no-results {
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-style: italic;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>🐑 Troup'O Invaders - Sprite Viewer 🦙</h1>
-        <div class="subtitle">Sprite Development and Preview Tool</div>
-    </header>
-
-    <div class="controls">
-        <div class="control-group">
-            <label for="zoom">Zoom:</label>
-            <select id="zoom">
-                <option value="1">1x</option>
-                <option value="2" selected>2x</option>
-                <option value="3">3x</option>
-                <option value="4">4x</option>
-                <option value="5">5x</option>
-                <option value="6">6x</option>
-                <option value="8">8x</option>
-            </select>
-        </div>
-
-        <div class="control-group">
-            <label for="background">Background:</label>
-            <select id="background">
-                <option value="dark" selected>Dark</option>
-                <option value="light">Light</option>
-                <option value="transparent">Transparent</option>
-            </select>
-        </div>
-
-        <div class="control-group">
-            <button id="refresh">🔄 Refresh</button>
-        </div>
+    <div class="header">
+        <h1>🎮 Sprite Atlas Viewer</h1>
+        <div class="atlas-mode" id="atlasModeDisplay">Loading...</div>
     </div>
 
-    <div class="stats" id="stats" style="display: none;">
-        <div style="font-weight: bold; margin-bottom: 10px; color: #4CAF50;">Sprite Atlas Statistics</div>
-        <div class="stats-grid">
-            <div class="stat-item">
-                <div class="stat-value" id="totalSprites">0</div>
-                <div class="stat-label">Total Sprites</div>
+    <div class="main-container">
+        <div class="sidebar">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 Search sprites...">
             </div>
-            <div class="stat-item">
-                <div class="stat-value" id="totalEnemies">0</div>
-                <div class="stat-label">Enemy Types</div>
+            <div class="sprite-list-container" id="spriteList">
+                <div class="no-results">Loading sprites...</div>
             </div>
-            <div class="stat-item">
-                <div class="stat-value" id="totalWeapons">0</div>
-                <div class="stat-label">Weapon Sprites</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="totalEffects">0</div>
-                <div class="stat-label">Effect Sprites</div>
+        </div>
+
+        <div class="detail-panel">
+            <div class="detail-content" id="detailContent">
+                <div class="empty-state">
+                    ← Select a sprite to view details
+                </div>
             </div>
         </div>
     </div>
 
-    <div id="loading" class="loading">Loading sprites...</div>
-    <div id="error" class="error" style="display: none;"></div>
-    <div id="spriteGrid" class="sprite-grid"></div>
+    <div class="controls-bar">
+        <div class="control-group">
+            <span class="control-label">Zoom:</span>
+            <div class="zoom-buttons">
+                <button class="zoom-btn" data-zoom="1">1x</button>
+                <button class="zoom-btn active" data-zoom="2">2x</button>
+                <button class="zoom-btn" data-zoom="4">4x</button>
+                <button class="zoom-btn" data-zoom="6">6x</button>
+                <button class="zoom-btn" data-zoom="8">8x</button>
+            </div>
+        </div>
+        <div class="control-group">
+            <span class="control-label">Background:</span>
+            <div class="bg-buttons">
+                <button class="bg-btn active" data-bg="dark">Dark</button>
+                <button class="bg-btn" data-bg="light">Light</button>
+                <button class="bg-btn" data-bg="checker">Checker</button>
+            </div>
+        </div>
+    </div>
 
     <script>
-        let spriteAtlas = null;
-        let loadedImages = {};
+        // Application State
+        const state = {
+            atlasData: null,
+            atlasImage: null,
+            selectedSprite: null,
+            zoom: 2,
+            background: 'dark',
+            searchTerm: '',
+            images: {} // Cache for individual sprite images
+        };
 
-        async function loadSpriteAtlas() {
+        // Categories mapping
+        const categories = {
+            'Player': ['player'],
+            'Enemies': ['sheep-enemy', 'goat-enemy', 'alpaca-enemy', 'ufo'],
+            'Weapons': ['bulletPlayer', 'bulletEnemy', 'shield'],
+            'Effects': ['explosion1', 'explosion2', 'particle', 'smoke'],
+            'Other': []
+        };
+
+        // Initialize
+        async function init() {
             try {
+                // Load sprite atlas data
                 const response = await fetch('assets/sprite-atlas.json');
-                if (!response.ok) {
-                    throw new Error(`Failed to load sprite atlas: ${response.status}`);
+                state.atlasData = await response.json();
+
+                // Update mode display
+                const mode = state.atlasData.meta.mode;
+                document.getElementById('atlasModeDisplay').textContent = 
+                    `Mode: ${mode.toUpperCase()}`;
+
+                // Load atlas image if in packed mode
+                if (mode === 'packed' && state.atlasData.meta.atlasTexture) {
+                    state.atlasImage = await loadImage(`assets/${state.atlasData.meta.atlasTexture}`);
                 }
-                spriteAtlas = await response.json();
-                return spriteAtlas;
+
+                // Render sprite list
+                renderSpriteList();
+
+                // Setup event listeners
+                setupEventListeners();
+
             } catch (error) {
-                console.error('Error loading sprite atlas:', error);
-                throw error;
+                console.error('Failed to initialize:', error);
+                document.getElementById('spriteList').innerHTML = 
+                    '<div class="no-results">Error loading sprite atlas</div>';
             }
         }
 
-        async function loadImage(path) {
+        // Load image helper
+        function loadImage(src) {
             return new Promise((resolve, reject) => {
                 const img = new Image();
                 img.onload = () => resolve(img);
-                img.onerror = () => reject(new Error(`Failed to load image: ${path}`));
-                img.src = path;
+                img.onerror = reject;
+                img.src = src;
             });
         }
 
-        function drawSpriteToCanvas(image, width, height, zoom) {
-            const canvas = document.createElement('canvas');
-            canvas.width = width * zoom;
-            canvas.height = height * zoom;
+        // Categorize sprites
+        function categorizeSprites() {
+            const categorized = {};
+            const sprites = state.atlasData.sprites;
+
+            // Initialize categories
+            Object.keys(categories).forEach(cat => {
+                categorized[cat] = [];
+            });
+
+            // Categorize each sprite
+            Object.keys(sprites).forEach(spriteId => {
+                let assigned = false;
+                for (const [category, patterns] of Object.entries(categories)) {
+                    if (patterns.some(pattern => spriteId.includes(pattern))) {
+                        categorized[category].push(spriteId);
+                        assigned = true;
+                        break;
+                    }
+                }
+                if (!assigned && category !== 'Other') {
+                    categorized['Other'].push(spriteId);
+                }
+            });
+
+            return categorized;
+        }
+
+        // Render sprite list
+        function renderSpriteList() {
+            const listContainer = document.getElementById('spriteList');
+            const categorized = categorizeSprites();
+            const searchLower = state.searchTerm.toLowerCase();
+
+            let html = '';
+            let hasResults = false;
+
+            Object.entries(categorized).forEach(([category, spriteIds]) => {
+                // Filter by search
+                const filtered = spriteIds.filter(id => 
+                    id.toLowerCase().includes(searchLower)
+                );
+
+                if (filtered.length === 0) return;
+
+                hasResults = true;
+                html += `<div class="category">`;
+                html += `<div class="category-header">${category}</div>`;
+
+                filtered.forEach(spriteId => {
+                    const sprite = state.atlasData.sprites[spriteId];
+                    const isActive = state.selectedSprite === spriteId;
+                    
+                    html += `
+                        <div class="sprite-item ${isActive ? 'active' : ''}" 
+                             data-sprite="${spriteId}">
+                            <div class="sprite-thumbnail" id="thumb-${spriteId}">
+                                <!-- Thumbnail will be rendered here -->
+                            </div>
+                            <div class="sprite-info">
+                                <div class="sprite-name">${spriteId}</div>
+                                <div class="sprite-dims">${sprite.width}×${sprite.height}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `</div>`;
+            });
+
+            if (!hasResults) {
+                html = '<div class="no-results">No sprites found</div>';
+            }
+
+            listContainer.innerHTML = html;
+
+            // Render thumbnails
+            if (hasResults) {
+                renderThumbnails();
+            }
+        }
+
+        // Render thumbnails
+        async function renderThumbnails() {
+            const sprites = state.atlasData.sprites;
+            const mode = state.atlasData.meta.mode;
+
+            for (const spriteId of Object.keys(sprites)) {
+                const thumbElement = document.getElementById(`thumb-${spriteId}`);
+                if (!thumbElement) continue;
+
+                const sprite = sprites[spriteId];
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                // Set canvas size to fit in 32x32 while maintaining aspect ratio
+                const maxSize = 32;
+                const scale = Math.min(maxSize / sprite.width, maxSize / sprite.height);
+                canvas.width = sprite.width * scale;
+                canvas.height = sprite.height * scale;
+
+                try {
+                    if (mode === 'packed' && state.atlasImage && sprite.uv) {
+                        // Draw from atlas
+                        const uv = sprite.uv;
+                        ctx.drawImage(
+                            state.atlasImage,
+                            uv.x, uv.y, uv.width, uv.height,
+                            0, 0, canvas.width, canvas.height
+                        );
+                    } else if (mode === 'individual') {
+                        // Load individual image
+                        const imgPath = `assets/${state.atlasData.meta.spritePath}${sprite.file}`;
+                        
+                        if (!state.images[spriteId]) {
+                            state.images[spriteId] = await loadImage(imgPath);
+                        }
+                        
+                        ctx.drawImage(
+                            state.images[spriteId],
+                            0, 0, canvas.width, canvas.height
+                        );
+                    }
+                } catch (error) {
+                    console.error(`Failed to render thumbnail for ${spriteId}:`, error);
+                }
+
+                thumbElement.appendChild(canvas);
+            }
+        }
+
+        // Render detail panel
+        function renderDetailPanel() {
+            const detailContent = document.getElementById('detailContent');
+
+            if (!state.selectedSprite) {
+                detailContent.innerHTML = `
+                    <div class="empty-state">
+                        ← Select a sprite to view details
+                    </div>
+                `;
+                return;
+            }
+
+            const sprite = state.atlasData.sprites[state.selectedSprite];
+            const mode = state.atlasData.meta.mode;
+
+            let html = `
+                <div class="preview-section">
+                    <div class="preview-header">${state.selectedSprite}</div>
+                    <div class="preview-container bg-${state.background}">
+                        <canvas id="previewCanvas" class="preview-canvas"></canvas>
+                    </div>
+                </div>
+
+                <div class="metadata-section">
+                    <div class="metadata-header">Metadata</div>
+                    <div class="metadata-grid">
+                        <div class="metadata-item">
+                            <div class="metadata-label">Dimensions:</div>
+                            <div class="metadata-value">${sprite.width} × ${sprite.height} px</div>
+                        </div>
+                        <div class="metadata-item">
+                            <div class="metadata-label">Filename:</div>
+                            <div class="metadata-value">${sprite.file || 'N/A'}</div>
+                        </div>
+            `;
+
+            if (sprite.points !== undefined) {
+                html += `
+                    <div class="metadata-item">
+                        <div class="metadata-label">Points:</div>
+                        <div class="metadata-value">${sprite.points}</div>
+                    </div>
+                `;
+            }
+
+            if (mode === 'packed' && sprite.uv) {
+                const uv = sprite.uv;
+                const atlasWidth = state.atlasData.meta.atlasWidth;
+                const atlasHeight = state.atlasData.meta.atlasHeight;
+                
+                // Calculate normalized UV coordinates
+                const u0 = (uv.x / atlasWidth).toFixed(4);
+                const v0 = (uv.y / atlasHeight).toFixed(4);
+                const u1 = ((uv.x + uv.width) / atlasWidth).toFixed(4);
+                const v1 = ((uv.y + uv.height) / atlasHeight).toFixed(4);
+
+                html += `
+                    <div class="metadata-item">
+                        <div class="metadata-label">UV Coords (px):</div>
+                        <div class="metadata-value">
+                            x: ${uv.x}, y: ${uv.y}, w: ${uv.width}, h: ${uv.height}
+                        </div>
+                    </div>
+                    <div class="metadata-item">
+                        <div class="metadata-label">UV Normalized:</div>
+                        <div class="metadata-value">
+                            <div class="uv-coords">
+                                <div class="uv-item">u0: ${u0}</div>
+                                <div class="uv-item">v0: ${v0}</div>
+                                <div class="uv-item">u1: ${u1}</div>
+                                <div class="uv-item">v1: ${v1}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (sprite.animation) {
+                const anim = sprite.animation;
+                html += `
+                    <div class="metadata-item">
+                        <div class="metadata-label">Animation:</div>
+                        <div class="metadata-value">
+                            Frames: ${anim.frameCount || 'N/A'}, 
+                            FPS: ${anim.fps || 'N/A'}, 
+                            Loop: ${anim.loop ? 'Yes' : 'No'}
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += `
+                    </div>
+                </div>
+            `;
+
+            detailContent.innerHTML = html;
+
+            // Render preview canvas
+            renderPreview();
+        }
+
+        // Render preview
+        async function renderPreview() {
+            const canvas = document.getElementById('previewCanvas');
+            if (!canvas) return;
+
+            const sprite = state.atlasData.sprites[state.selectedSprite];
+            const mode = state.atlasData.meta.mode;
             const ctx = canvas.getContext('2d');
-            
-            ctx.imageSmoothingEnabled = false;
-            ctx.drawImage(image, 0, 0, width, height, 0, 0, width * zoom, height * zoom);
-            
-            return canvas;
-        }
 
-        function createSpriteCard(name, spriteData, zoom, background) {
-            const card = document.createElement('div');
-            card.className = 'sprite-card';
-            
-            const container = document.createElement('div');
-            container.className = `sprite-container bg-${background}`;
-            
-            const nameDiv = document.createElement('div');
-            nameDiv.className = 'sprite-name';
-            nameDiv.textContent = name;
-            
-            const infoDiv = document.createElement('div');
-            infoDiv.className = 'sprite-info';
-            
-            const dimensions = document.createElement('div');
-            dimensions.textContent = `${spriteData.width}x${spriteData.height}px`;
-            
-            const filePath = document.createElement('div');
-            filePath.textContent = spriteData.file;
-            
-            infoDiv.appendChild(dimensions);
-            
-            if (spriteData.points !== undefined) {
-                const points = document.createElement('div');
-                points.textContent = `⭐ ${spriteData.points} points`;
-                points.style.color = '#FFD700';
-                infoDiv.appendChild(points);
-            }
-            
-            infoDiv.appendChild(filePath);
-            
-            card.appendChild(container);
-            card.appendChild(nameDiv);
-            card.appendChild(infoDiv);
-            
-            return { card, container };
-        }
+            // Set canvas size
+            canvas.width = sprite.width * state.zoom;
+            canvas.height = sprite.height * state.zoom;
 
-        async function renderSprites() {
-            const loading = document.getElementById('loading');
-            const error = document.getElementById('error');
-            const grid = document.getElementById('spriteGrid');
-            const stats = document.getElementById('stats');
-            
-            loading.style.display = 'block';
-            error.style.display = 'none';
-            grid.innerHTML = '';
-            stats.style.display = 'none';
-            
-            const zoom = parseInt(document.getElementById('zoom').value);
-            const background = document.getElementById('background').value;
-            
             try {
-                if (!spriteAtlas) {
-                    spriteAtlas = await loadSpriteAtlas();
-                }
-                
-                const basePath = spriteAtlas.meta.image || 'sprites/';
-                const sprites = spriteAtlas.sprites;
-                
-                // Calculate statistics
-                let enemyCount = 0;
-                let weaponCount = 0;
-                let effectCount = 0;
-                
-                for (const [name, data] of Object.entries(sprites)) {
-                    if (name.includes('enemy') || name.includes('sheep') || name.includes('goat') || name.includes('alpaca') || name === 'ufo') {
-                        enemyCount++;
-                    } else if (name.includes('bullet')) {
-                        weaponCount++;
-                    } else if (name.includes('explosion') || name.includes('particle')) {
-                        effectCount++;
-                    }
-                }
-                
-                document.getElementById('totalSprites').textContent = Object.keys(sprites).length;
-                document.getElementById('totalEnemies').textContent = enemyCount;
-                document.getElementById('totalWeapons').textContent = weaponCount;
-                document.getElementById('totalEffects').textContent = effectCount;
-                stats.style.display = 'block';
-                
-                // Load and render all sprites
-                for (const [name, data] of Object.entries(sprites)) {
-                    const imagePath = `assets/${basePath}${data.file}`;
+                if (mode === 'packed' && state.atlasImage && sprite.uv) {
+                    // Draw from atlas
+                    const uv = sprite.uv;
+                    ctx.drawImage(
+                        state.atlasImage,
+                        uv.x, uv.y, uv.width, uv.height,
+                        0, 0, canvas.width, canvas.height
+                    );
+                } else if (mode === 'individual') {
+                    // Load and draw individual image
+                    const imgPath = `assets/${state.atlasData.meta.spritePath}${sprite.file}`;
                     
-                    // Load image if not cached
-                    if (!loadedImages[imagePath]) {
-                        loadedImages[imagePath] = await loadImage(imagePath);
+                    if (!state.images[state.selectedSprite]) {
+                        state.images[state.selectedSprite] = await loadImage(imgPath);
                     }
                     
-                    const image = loadedImages[imagePath];
-                    const { card, container } = createSpriteCard(name, data, zoom, background);
-                    
-                    const canvas = drawSpriteToCanvas(image, data.width, data.height, zoom);
-                    container.appendChild(canvas);
-                    
-                    grid.appendChild(card);
+                    ctx.drawImage(
+                        state.images[state.selectedSprite],
+                        0, 0, canvas.width, canvas.height
+                    );
                 }
-                
-                loading.style.display = 'none';
-                
-            } catch (err) {
-                console.error('Error rendering sprites:', err);
-                loading.style.display = 'none';
-                error.style.display = 'block';
-                error.textContent = `Error: ${err.message}`;
+            } catch (error) {
+                console.error('Failed to render preview:', error);
+                ctx.fillStyle = '#ff0000';
+                ctx.fillText('Error loading sprite', 10, 20);
             }
         }
 
-        // Event listeners
-        document.getElementById('zoom').addEventListener('change', renderSprites);
-        document.getElementById('background').addEventListener('change', () => {
-            const background = document.getElementById('background').value;
-            document.querySelectorAll('.sprite-container').forEach(container => {
-                container.className = `sprite-container bg-${background}`;
+        // Setup event listeners
+        function setupEventListeners() {
+            // Search input
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                state.searchTerm = e.target.value;
+                renderSpriteList();
             });
-        });
-        document.getElementById('refresh').addEventListener('click', () => {
-            loadedImages = {};
-            spriteAtlas = null;
-            renderSprites();
-        });
 
-        // Initial load
-        renderSprites();
+            // Sprite list clicks
+            document.getElementById('spriteList').addEventListener('click', (e) => {
+                const item = e.target.closest('.sprite-item');
+                if (item) {
+                    state.selectedSprite = item.dataset.sprite;
+                    renderSpriteList();
+                    renderDetailPanel();
+                }
+            });
+
+            // Zoom buttons
+            document.querySelectorAll('.zoom-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    state.zoom = parseInt(btn.dataset.zoom);
+                    document.querySelectorAll('.zoom-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    if (state.selectedSprite) {
+                        renderPreview();
+                    }
+                });
+            });
+
+            // Background buttons
+            document.querySelectorAll('.bg-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    state.background = btn.dataset.bg;
+                    document.querySelectorAll('.bg-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    if (state.selectedSprite) {
+                        const container = document.querySelector('.preview-container');
+                        if (container) {
+                            container.className = `preview-container bg-${state.background}`;
+                        }
+                    }
+                });
+            });
+        }
+
+        // Start the application
+        init();
     </script>
 </body>
 </html>

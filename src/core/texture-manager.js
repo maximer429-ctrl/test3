@@ -80,27 +80,84 @@ class TextureManager {
             // Get base path from atlas file location
             const basePath = atlasPath.substring(0, atlasPath.lastIndexOf('/') + 1);
             
-            // Load all sprites from atlas
-            const sprites = atlas.sprites || {};
-            this.totalCount = Object.keys(sprites).length;
+            // Determine mode (v2.0+ has explicit mode, v1.0 is always individual)
+            const mode = atlas.meta.mode || 'individual';
             
-            const loadPromises = [];
-            for (const [name, spriteData] of Object.entries(sprites)) {
-                const spritePath = `${basePath}${atlas.meta.image}${spriteData.file}`;
-                loadPromises.push(
-                    this.loadTexture(name, spritePath).catch(err => {
-                        console.warn(`Failed to load sprite ${name}:`, err);
-                        return null;
-                    })
-                );
+            if (mode === 'packed') {
+                // Load single texture atlas (future implementation)
+                await this.loadPackedAtlas(basePath, atlas);
+            } else {
+                // Load individual sprite files (current implementation)
+                await this.loadIndividualSprites(basePath, atlas);
             }
             
-            await Promise.all(loadPromises);
             console.log(`Sprite atlas loaded: ${this.loadedCount}/${this.totalCount} textures`);
             
         } catch (error) {
             console.error('Error loading sprite atlas:', error);
             throw error;
+        }
+    }
+    
+    /**
+     * Load sprites from individual PNG files
+     * @param {string} basePath - Base directory path
+     * @param {Object} atlas - Atlas configuration object
+     * @returns {Promise<void>}
+     * @private
+     */
+    async loadIndividualSprites(basePath, atlas) {
+        const sprites = atlas.sprites || {};
+        this.totalCount = Object.keys(sprites).length;
+        
+        // Support both v1.0 (meta.image) and v2.0 (meta.spritePath) format
+        const spritePath = atlas.meta.spritePath || atlas.meta.image || 'sprites/';
+        
+        const loadPromises = [];
+        for (const [name, spriteData] of Object.entries(sprites)) {
+            const fullPath = `${basePath}${spritePath}${spriteData.file}`;
+            loadPromises.push(
+                this.loadTexture(name, fullPath).catch(err => {
+                    console.warn(`Failed to load sprite ${name}:`, err);
+                    return null;
+                })
+            );
+        }
+        
+        await Promise.all(loadPromises);
+    }
+    
+    /**
+     * Load sprites from a packed texture atlas
+     * @param {string} basePath - Base directory path
+     * @param {Object} atlas - Atlas configuration object
+     * @returns {Promise<void>}
+     * @private
+     */
+    async loadPackedAtlas(basePath, atlas) {
+        const atlasTexturePath = `${basePath}${atlas.meta.atlasTexture}`;
+        
+        // Load the single atlas texture
+        await this.loadTexture('__atlas__', atlasTexturePath);
+        
+        const sprites = atlas.sprites || {};
+        this.totalCount = Object.keys(sprites).length;
+        
+        // Store sprite UV data for rendering
+        // Each sprite will reference the atlas texture but with different UV coordinates
+        for (const [name, spriteData] of Object.entries(sprites)) {
+            if (spriteData.uv) {
+                // Reference the atlas texture with UV coordinates
+                const atlasTextureData = this.textures.get('__atlas__');
+                this.textures.set(name, {
+                    texture: atlasTextureData.texture,
+                    width: spriteData.width,
+                    height: spriteData.height,
+                    uv: spriteData.uv,
+                    isAtlasSprite: true
+                });
+                this.loadedCount++;
+            }
         }
     }
     
@@ -133,6 +190,74 @@ class TextureManager {
             return null;
         }
         return this.spriteAtlas.sprites[name] || null;
+    }
+    
+    /**
+     * Apply atlas UV coordinates to a Sprite object
+     * @param {Sprite} sprite - Sprite instance to configure
+     * @param {string} spriteName - Name of sprite in atlas
+     * @returns {boolean} Success status
+     */
+    applySpriteUVs(sprite, spriteName) {
+        const spriteData = this.getSpriteData(spriteName);
+        if (!spriteData) {
+            console.warn(`Sprite ${spriteName} not found in atlas`);
+            return false;
+        }
+
+        const textureData = this.getTextureData(spriteName);
+        if (!textureData) {
+            console.warn(`Texture for sprite ${spriteName} not loaded`);
+            return false;
+        }
+
+        // Set texture
+        sprite.texture = textureData.texture;
+
+        // Set size
+        sprite.width = spriteData.width;
+        sprite.height = spriteData.height;
+
+        // Set UV coordinates
+        if (textureData.uv) {
+            // Packed atlas mode - use precalculated UVs
+            sprite.setTexCoords(
+                textureData.uv.u0,
+                textureData.uv.v0,
+                textureData.uv.u1 - textureData.uv.u0,
+                textureData.uv.v1 - textureData.uv.v0
+            );
+        } else {
+            // Individual texture mode - use full texture (0, 0, 1, 1)
+            sprite.setTexCoords(0, 0, 1, 1);
+        }
+
+        return true;
+    }
+    
+    /**
+     * Create a properly configured Sprite object from atlas
+     * @param {string} spriteName - Name of sprite in atlas
+     * @param {number} x - Initial X position
+     * @param {number} y - Initial Y position
+     * @returns {Sprite|null} Configured sprite or null if not found
+     */
+    createSprite(spriteName, x = 0, y = 0) {
+        const spriteData = this.getSpriteData(spriteName);
+        if (!spriteData) {
+            console.warn(`Sprite ${spriteName} not found in atlas`);
+            return null;
+        }
+
+        // Create new Sprite instance
+        const sprite = new Sprite(x, y, spriteData.width, spriteData.height);
+        
+        // Apply texture and UVs
+        if (this.applySpriteUVs(sprite, spriteName)) {
+            return sprite;
+        }
+
+        return null;
     }
     
     /**

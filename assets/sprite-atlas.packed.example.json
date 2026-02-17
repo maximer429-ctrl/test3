@@ -1,0 +1,204 @@
+{
+  "_comment": "This is an EXAMPLE of the packed spritesheet format. Use this as a reference when implementing the packer tool.",
+  "meta": {
+    "version": "2.0",
+    "mode": "packed",
+    "format": "RGBA8888",
+    "description": "Packed sprite atlas for Troup'O Invaders. All sprites combined into a single texture.",
+    "spritePath": null,
+    "atlasTexture": "sprite-atlas.png",
+    "atlasWidth": 512,
+    "atlasHeight": 512,
+    "padding": 2
+  },
+  "sprites": {
+    "player": {
+      "file": "player",
+      "width": 40,
+      "height": 30,
+      "uv": {
+        "x": 0,
+        "y": 0,
+        "width": 40,
+        "height": 30,
+        "u0": 0.0,
+        "v0": 0.0,
+        "u1": 0.078125,
+        "v1": 0.05859375
+      }
+    },
+    "sheep-enemy": {
+      "file": "sheep-enemy",
+      "width": 30,
+      "height": 30,
+      "points": 10,
+      "uv": {
+        "x": 42,
+        "y": 0,
+        "width": 30,
+        "height": 30,
+        "u0": 0.08203125,
+        "v0": 0.0,
+        "u1": 0.140625,
+        "v1": 0.05859375
+      }
+    },
+    "goat-enemy": {
+      "file": "goat-enemy",
+      "width": 30,
+      "height": 30,
+      "points": 20,
+      "uv": {
+        "x": 74,
+        "y": 0,
+        "width": 30,
+        "height": 30,
+        "u0": 0.14453125,
+        "v0": 0.0,
+        "u1": 0.203125,
+        "v1": 0.05859375
+      }
+    },
+    "alpaca-enemy": {
+      "file": "alpaca-enemy",
+      "width": 30,
+      "height": 30,
+      "points": 30,
+      "uv": {
+        "x": 106,
+        "y": 0,
+        "width": 30,
+        "height": 30,
+        "u0": 0.20703125,
+        "v0": 0.0,
+        "u1": 0.265625,
+        "v1": 0.05859375
+      }
+    },
+    "bulletPlayer": {
+      "file": "bullet-player",
+      "width": 4,
+      "height": 12,
+      "uv": {
+        "x": 138,
+        "y": 0,
+        "width": 4,
+        "height": 12,
+        "u0": 0.26953125,
+        "v0": 0.0,
+        "u1": 0.27734375,
+        "v1": 0.0234375
+      }
+    },
+    "bulletEnemy": {
+      "file": "bullet-enemy",
+      "width": 4,
+      "height": 12,
+      "uv": {
+        "x": 144,
+        "y": 0,
+        "width": 4,
+        "height": 12,
+        "u0": 0.28125,
+        "v0": 0.0,
+        "u1": 0.28906250,
+        "v1": 0.0234375
+      }
+    },
+    "shield": {
+      "file": "shield",
+      "width": 60,
+      "height": 40,
+      "uv": {
+        "x": 0,
+        "y": 32,
+        "width": 60,
+        "height": 40,
+        "u0": 0.0,
+        "v0": 0.0625,
+        "u1": 0.1171875,
+        "v1": 0.140625
+      }
+    },
+    "ufo": {
+      "file": "ufo",
+      "width": 40,
+      "height": 20,
+      "points": 100,
+      "uv": {
+        "x": 62,
+        "y": 32,
+        "width": 40,
+        "height": 20,
+        "u0": 0.12109375,
+        "v0": 0.0625,
+        "u1": 0.19921875,
+        "v1": 0.1015625
+      }
+    },
+    "explosion1": {
+      "file": "explosion1",
+      "width": 32,
+      "height": 32,
+      "uv": {
+        "x": 0,
+        "y": 74,
+        "width": 32,
+        "height": 32,
+        "u0": 0.0,
+        "v0": 0.14453125,
+        "u1": 0.0625,
+        "v1": 0.20703125
+      },
+      "animation": {
+        "frameCount": 2,
+        "fps": 10,
+        "loop": false,
+        "frames": [
+          {
+            "uv": {
+              "x": 0,
+              "y": 74,
+              "width": 32,
+              "height": 32,
+              "u0": 0.0,
+              "v0": 0.14453125,
+              "u1": 0.0625,
+              "v1": 0.20703125
+            },
+            "duration": 50
+          },
+          {
+            "uv": {
+              "x": 34,
+              "y": 74,
+              "width": 32,
+              "height": 32,
+              "u0": 0.06640625,
+              "v0": 0.14453125,
+              "u1": 0.12890625,
+              "v1": 0.20703125
+            },
+            "duration": 50
+          }
+        ]
+      }
+    },
+    "explosion2": {
+      "file": "explosion2",
+      "width": 32,
+      "height": 32,
+      "uv": {
+        "x": 66,
+        "y": 74,
+        "width": 32,
+        "height": 32,
+        "u0": 0.12890625,
+        "v0": 0.14453125,
+        "u1": 0.19140625,
+        "v1": 0.20703125
+      },
+      "animation": null
+    }
+  }
+}

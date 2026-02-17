@@ -2,45 +2,97 @@
 
 This directory contains game assets for Troup'O Invaders.
 
+## Sprite System
+
+The game uses a flexible sprite atlas system that supports two modes:
+
+### Individual Mode (Current)
+- Each sprite is stored as a separate PNG file in `sprites/`
+- `sprite-atlas.json` references individual files
+- Best for development and easy sprite updates
+
+### Packed Mode (Available)
+- All sprites combined into a single texture atlas (`sprite-atlas.png`)
+- Improved performance (single texture bind)
+- Better GPU memory utilization
+- See [SPRITE-ATLAS-SPEC.md](SPRITE-ATLAS-SPEC.md) for format details
+
+## Workflow
+
+### Adding New Sprites
+
+1. Create your sprite PNG and save to `sprites/`
+2. Update `sprite-atlas.json` with sprite data:
+   ```json
+   "my-sprite": {
+     "file": "my-sprite.png",
+     "width": 32,
+     "height": 32,
+     "uv": null
+   }
+   ```
+
+### Packing Sprites
+
+To generate a packed sprite atlas:
+
+```bash
+npm install          # Install canvas dependency if needed
+npm run pack-sprites # Run the packer tool
+```
+
+This will:
+- Read all sprites from `sprite-atlas.json`
+- Pack them into `sprite-atlas.png`
+- Update `sprite-atlas.json` with UV coordinates
+- Switch to packed mode automatically
+
+### Viewing Sprites
+
+Open `sprite-viewer.html` in a browser to:
+- Browse all sprites with search/filtering
+- Inspect individual sprite details
+- View UV coordinates (packed mode)
+- Test different zoom levels and backgrounds
+
 ## Structure
 
-- `sprites/` - Sprite images (PNG format)
-- `sprite-atlas.json` - Sprite metadata and configuration
-- `sounds/` - Sound effects and music (TODO)
-- `fonts/` - Custom fonts for UI (if needed)
+- `sprites/` - Individual sprite PNG files
+- `sprite-atlas.json` - Sprite metadata and configuration (v2.0)
+- `sprite-atlas.packed.example.json` - Example of packed format
+- `SPRITE-ATLAS-SPEC.md` - Complete format specification
 
-## Generated Sprites
-
-All sprites have been generated as solid-color PNG files:
+## Current Sprites
 
 ### Player
-- `player.png` (40x30) - Green player ship
+- `player.png` (40x30) - Player ship
 
-### Enemies
-- `enemy1.png` (30x30) - Red enemy (10 points)
-- `enemy2.png` (30x30) - Orange enemy (20 points)
-- `enemy3.png` (30x30) - Purple enemy (30 points)
+### Enemies (Ruminant Theme)
+- `sheep-enemy.png` (30x30) - Sheep enemy (10 points)
+- `goat-enemy.png` (30x30) - Goat enemy (20 points)
+- `alpaca-enemy.png` (30x30) - Alpaca enemy (30 points)
+- `ufo.png` (40x20) - Bonus UFO (100 points)
 
 ### Weapons
-- `bullet-player.png` (4x12) - Green player bullet
-- `bullet-enemy.png` (4x12) - Red enemy bullet
+- `bullet-player.png` (4x12) - Player bullet
+- `bullet-enemy.png` (4x12) - Enemy bullet
 
 ### Objects
-- `shield.png` (60x40) - Blue destructible shield
-- `ufo.png` (40x20) - Yellow bonus UFO (100 points)
+- `shield.png` (60x40) - Destructible shield
 
 ### Effects
-- `explosion1.png` (32x32) - Orange explosion frame 1
-- `explosion2.png` (32x32) - Red explosion frame 2
+- `explosion1.png` (32x32) - Explosion frame 1
+- `explosion2.png` (32x32) - Explosion frame 2
 
-## Sprite Atlas
+## Tools
 
-The `sprite-atlas.json` file contains metadata for all sprites including dimensions and point values. Load this file to get sprite information programmatically.
+- `../generate-spritesheet.js` - Sprite packer tool
+- `../sprite-viewer.html` - Interactive sprite inspector
+- `../sprite-generator.html` - Sprite creation tool
 
 ## Future Enhancements
 
-- Replace solid colors with pixel art designs
 - Add animation frames for enemies
 - Add more explosion frames
 - Add particle textures
-- Add sound effects (shoot, explosion, movement, UFO)
+- Add sound effects directory
