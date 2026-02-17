@@ -25,7 +25,7 @@ class Game {
         
         // Entities
         this.player = null;
-        this.enemies = [];
+        this.enemyFormation = null;
         this.bullets = [];
         this.shields = [];
         this.ufo = null;
@@ -105,6 +105,9 @@ class Game {
                 this.reset(); // Start fresh game
             }
         });
+        
+        // Initialize enemy formation
+        this.enemyFormation = new EnemyFormation();
         
         // TODO: Initialize input manager (test3-724)
         // TODO: Initialize collision manager (test3-5ag)
@@ -215,11 +218,14 @@ class Game {
         }
         
         // Update all game systems and entities
-        // Will be implemented when systems are ready
+        
+        // Update enemy formation
+        if (this.enemyFormation) {
+            this.enemyFormation.update(deltaTime);
+        }
         
         // TODO: Update input
         // TODO: Update player
-        // TODO: Update enemies
         // TODO: Update bullets
         // TODO: Update collisions
         // TODO: Update particles
@@ -235,12 +241,18 @@ class Game {
         
         // Only render game content when in playing state
         if (this.gameStateManager && this.gameStateManager.isPlaying()) {
-            // Render test sprites (temporary, for development)
-            if (this.testSprites && this.testSprites.length > 0) {
-                this.spriteRenderer.render(this.testSprites);
+            // Render enemies
+            if (this.enemyFormation) {
+                const enemies = this.enemyFormation.getAliveEnemies();
+                if (enemies.length > 0) {
+                    this.spriteRenderer.render(enemies);
+                }
             }
             
-            // TODO: Render all game entities
+            // TODO: Render player
+            // TODO: Render bullets
+            // TODO: Render shields
+            // TODO: Render UFO
             // TODO: Render particles
             // TODO: Render UI
         }
@@ -252,12 +264,21 @@ class Game {
     
     reset() {
         // Reset game state for new game
-        this.enemies = [];
+        console.log('Resetting game...');
+        
+        // Reset bullets and other entities
         this.bullets = [];
         this.shields = [];
         this.ufo = null;
         
-        // TODO: Reinitialize entities
+        // Create enemy formation
+        if (this.enemyFormation && this.textureManager) {
+            this.enemyFormation.reset();
+            this.enemyFormation.createFormation(this.textureManager);
+        }
+        
+        // TODO: Reinitialize player
+        // TODO: Reinitialize shields
         // TODO: Reset wave manager
         // TODO: Reset score
     }
