@@ -111,41 +111,76 @@ function fillRect(pixels, width, x, y, w, h, r, g, b, a = 255) {
 
 /**
  * Create sheep enemy sprite (Enemy 1 - 10 points)
- * White/cream fluffy sheep
+ * Cute fluffy sheep with better pixel art
  */
 function createSheep() {
   const size = 30;
   const pixels = new Uint8Array(size * size * 4);
   
-  // Fluffy body (cloud-like)
-  fillRect(pixels, size, 8, 12, 14, 10, 245, 240, 235); // Main body
-  fillRect(pixels, size, 6, 13, 4, 8, 245, 240, 235);   // Left fluff
-  fillRect(pixels, size, 20, 13, 4, 8, 245, 240, 235);  // Right fluff
-  fillRect(pixels, size, 10, 10, 10, 4, 245, 240, 235); // Top fluff
+  // Define colors
+  const bodyColor = [245, 245, 250];      // White wool
+  const faceColor = [50, 45, 45];          // Dark gray/black face
+  const legColor = [50, 45, 45];           // Black legs
+  const outlineColor = [200, 200, 210];    // Light outline for wool
+  const eyeColor = [255, 255, 255];        // White eyes
+  const pupilColor = [0, 0, 0];            // Black pupils
   
-  // Head (darker wool)
-  fillRect(pixels, size, 10, 8, 10, 6, 220, 215, 210);
+  // Fluffy wool body - more organic cloud shape
+  // Main body mass
+  fillRect(pixels, size, 9, 13, 12, 8, ...bodyColor);
   
-  // Eyes
-  setPixel(pixels, size, 12, 10, 30, 30, 30);
-  setPixel(pixels, size, 17, 10, 30, 30, 30);
+  // Top fluff (rounded)
+  fillRect(pixels, size, 10, 11, 10, 2, ...bodyColor);
+  fillRect(pixels, size, 11, 10, 8, 1, ...bodyColor);
   
-  // Ears
-  fillRect(pixels, size, 9, 7, 2, 3, 220, 215, 210);
-  fillRect(pixels, size, 19, 7, 2, 3, 220, 215, 210);
+  // Bottom fluff
+  fillRect(pixels, size, 10, 21, 10, 1, ...bodyColor);
   
-  // Legs
-  fillRect(pixels, size, 10, 22, 2, 4, 60, 50, 45);
-  fillRect(pixels, size, 18, 22, 2, 4, 60, 50, 45);
+  // Side fluffs for roundness
+  fillRect(pixels, size, 8, 14, 1, 6, ...bodyColor);
+  fillRect(pixels, size, 21, 14, 1, 6, ...bodyColor);
+  fillRect(pixels, size, 7, 15, 1, 4, ...bodyColor);
+  fillRect(pixels, size, 22, 15, 1, 4, ...bodyColor);
   
-  // Fluffy tail
-  fillRect(pixels, size, 22, 16, 3, 3, 245, 240, 235);
+  // Add wool texture with lighter pixels
+  setPixel(pixels, size, 11, 13, 255, 255, 255);
+  setPixel(pixels, size, 13, 15, 255, 255, 255);
+  setPixel(pixels, size, 17, 14, 255, 255, 255);
+  setPixel(pixels, size, 15, 18, 255, 255, 255);
+  setPixel(pixels, size, 19, 17, 255, 255, 255);
   
-  // Outline for definition (optional - adds pixel art charm)
-  // Top of head
-  for (let x = 10; x < 20; x++) {
-    setPixel(pixels, size, x, 7, 180, 180, 175);
+  // Wool outline for definition
+  for (let x = 11; x < 19; x++) {
+    setPixel(pixels, size, x, 10, ...outlineColor);
   }
+  for (let x = 10; x < 20; x++) {
+    setPixel(pixels, size, x, 21, ...outlineColor);
+  }
+  
+  // Black/dark face (more rectangular, sheep-like)
+  fillRect(pixels, size, 11, 7, 8, 6, ...faceColor);
+  
+  // Ears sticking out from head
+  fillRect(pixels, size, 9, 8, 2, 3, ...faceColor);
+  fillRect(pixels, size, 19, 8, 2, 3, ...faceColor);
+  
+  // Eyes (white with black pupils - classic sheep look)
+  fillRect(pixels, size, 13, 9, 2, 2, ...eyeColor);
+  fillRect(pixels, size, 16, 9, 2, 2, ...eyeColor);
+  setPixel(pixels, size, 13, 10, ...pupilColor);
+  setPixel(pixels, size, 16, 10, ...pupilColor);
+  
+  // Nose/snout
+  setPixel(pixels, size, 14, 11, 100, 90, 90);
+  setPixel(pixels, size, 15, 11, 100, 90, 90);
+  
+  // Legs (thin black legs)
+  fillRect(pixels, size, 11, 22, 2, 4, ...legColor);
+  fillRect(pixels, size, 17, 22, 2, 4, ...legColor);
+  
+  // Small fluffy tail
+  fillRect(pixels, size, 22, 17, 2, 2, ...bodyColor);
+  fillRect(pixels, size, 23, 18, 1, 1, ...bodyColor);
   
   createPNG(size, size, pixels, 'sheep-enemy.png');
   return { name: 'sheep-enemy', width: size, height: size, points: 10 };

@@ -22,21 +22,48 @@
       "width": 30,
       "height": 30,
       "points": 10,
-      "uv": null
+      "uv": null,
+      "animation": {
+        "frameCount": 2,
+        "fps": 4,
+        "loop": true,
+        "frames": [
+          { "file": "sheep-enemy-frame1.png" },
+          { "file": "sheep-enemy-frame2.png" }
+        ]
+      }
     },
     "goat-enemy": {
       "file": "goat-enemy.png",
       "width": 30,
       "height": 30,
       "points": 20,
-      "uv": null
+      "uv": null,
+      "animation": {
+        "frameCount": 2,
+        "fps": 3,
+        "loop": true,
+        "frames": [
+          { "file": "goat-enemy-frame1.png" },
+          { "file": "goat-enemy-frame2.png" }
+        ]
+      }
     },
     "alpaca-enemy": {
       "file": "alpaca-enemy.png",
       "width": 30,
       "height": 30,
       "points": 30,
-      "uv": null
+      "uv": null,
+      "animation": {
+        "frameCount": 2,
+        "fps": 3,
+        "loop": true,
+        "frames": [
+          { "file": "alpaca-enemy-frame1.png" },
+          { "file": "alpaca-enemy-frame2.png" }
+        ]
+      }
     },
     "bulletPlayer": {
       "file": "bullet-player.png",
