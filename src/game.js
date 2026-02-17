@@ -90,9 +90,24 @@ class Game {
         
         console.log(`✓ Created ${this.testSprites.length} test sprites`);
         
+        // Initialize game state manager
+        this.gameStateManager = new GameStateManager();
+        
+        // Set up keyboard input for state management
+        this.setupStateInput();
+        
+        // Register state change callbacks
+        this.gameStateManager.onStateChange((oldState, newState) => {
+            console.log(`Game responding to state change: ${oldState} -> ${newState}`);
+            
+            // Handle state-specific initialization
+            if (newState === CONFIG.GAME_STATES.PLAYING && oldState === CONFIG.GAME_STATES.MENU) {
+                this.reset(); // Start fresh game
+            }
+        });
+        
         // TODO: Initialize input manager (test3-724)
         // TODO: Initialize collision manager (test3-5ag)
-        // TODO: Initialize game state manager (test3-h3q)
         // TODO: Initialize score manager (test3-8sm)
         
         console.log('Game systems initialized');
@@ -118,6 +133,45 @@ class Game {
         const sprite = new Sprite(x, y, spriteData.width, spriteData.height, [1, 1, 1, 1]);
         sprite.texture = texture;
         return sprite;
+    }
+    
+    /**
+     * Set up keyboard input for game state transitions
+     */
+    setupStateInput() {
+        window.addEventListener('keydown', (event) => {
+            if (!this.gameStateManager) return;
+            
+            switch (event.code) {
+                case 'Space':
+                    // Start game from menu
+                    if (this.gameStateManager.isState(CONFIG.GAME_STATES.MENU)) {
+                        event.preventDefault();
+                        this.gameStateManager.startGame();
+                    }
+                    break;
+                    
+                case 'KeyP':
+                    // Toggle pause
+                    if (this.gameStateManager.isState(CONFIG.GAME_STATES.PLAYING) ||
+                        this.gameStateManager.isState(CONFIG.GAME_STATES.PAUSED)) {
+                        event.preventDefault();
+                        this.gameStateManager.togglePause();
+                    }
+                    break;
+                    
+                case 'KeyR':
+                    // Restart from game over
+                    if (this.gameStateManager.isState(CONFIG.GAME_STATES.GAME_OVER)) {
+                        event.preventDefault();
+                        this.gameStateManager.setState(CONFIG.GAME_STATES.MENU);
+                        this.gameStateManager.startGame();
+                    }
+                    break;
+            }
+        });
+        
+        console.log('✓ State management keyboard input configured');
     }
     
     async start() {
@@ -155,6 +209,11 @@ class Game {
     }
     
     update(deltaTime) {
+        // Only update game logic when in playing state
+        if (!this.gameStateManager || !this.gameStateManager.isPlaying()) {
+            return;
+        }
+        
         // Update all game systems and entities
         // Will be implemented when systems are ready
         
@@ -164,7 +223,6 @@ class Game {
         // TODO: Update bullets
         // TODO: Update collisions
         // TODO: Update particles
-        // TODO: Update game state
     }
     
     render() {
