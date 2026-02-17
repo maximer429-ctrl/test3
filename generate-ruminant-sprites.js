@@ -399,50 +399,175 @@ function createGoat() {
 
 /**
  * Create alpaca enemy sprite (Enemy 3 - 30 points)
- * Tall, fuzzy alpaca with long neck
+ * Enhanced cartoon-style elegant alpaca with fluffy texture and long neck
  */
 function createAlpaca() {
   const size = 30;
   const pixels = new Uint8Array(size * size * 4);
   
-  // Body (fuzzy, light brown)
-  fillRect(pixels, size, 8, 16, 14, 8, 190, 160, 130);
+  // Enhanced color palette with shading
+  const fluffLight = [220, 190, 160];      // Brightest fluff highlights
+  const fluffMain = [200, 170, 140];       // Main fluffy fur
+  const fluffMid = [180, 150, 120];        // Mid-tone fur
+  const fluffDark = [160, 130, 100];       // Shadow fur
+  const fluffOutline = [140, 110, 80];     // Dark outline
+  const neckLight = [190, 160, 130];       // Neck highlight
+  const neckMain = [170, 140, 110];        // Main neck color
+  const neckDark = [150, 120, 90];         // Neck shadow
+  const faceLight = [180, 150, 120];       // Face highlight
+  const faceMain = [170, 140, 110];        // Main face
+  const faceDark = [150, 120, 90];         // Face shadow
+  const eyeBlack = [40, 30, 20];           // Gentle eyes
+  const eyeShine = [100, 80, 60];          // Eye highlight
+  const noseDark = [100, 80, 60];          // Nose
+  const legMain = [160, 130, 100];         // Leg color
+  const legDark = [140, 110, 80];          // Leg shadow
   
-  // Fuzzy texture on body
-  for (let y = 16; y < 24; y += 2) {
-    for (let x = 8; x < 22; x += 2) {
-      setPixel(pixels, size, x, y, 210, 180, 150);
-    }
-  }
+  // === FLUFFY BODY with enhanced texture ===
+  // Main body mass
+  fillRect(pixels, size, 8, 17, 14, 7, ...fluffMain);
   
-  // Long neck (distinctive alpaca feature)
-  fillRect(pixels, size, 13, 8, 4, 10, 180, 150, 120);
+  // Body highlights (top-left)
+  fillRect(pixels, size, 8, 17, 6, 2, ...fluffLight);
+  setPixel(pixels, size, 8, 19, ...fluffLight);
+  setPixel(pixels, size, 9, 19, ...fluffLight);
+  setPixel(pixels, size, 10, 20, ...fluffLight);
   
-  // Head (small, elongated)
-  fillRect(pixels, size, 12, 5, 6, 5, 180, 150, 120);
+  // Body shadows (bottom-right)
+  fillRect(pixels, size, 18, 21, 4, 3, ...fluffDark);
+  fillRect(pixels, size, 15, 22, 3, 2, ...fluffDark);
+  setPixel(pixels, size, 21, 20, ...fluffDark);
   
-  // Fuzzy top of head
-  fillRect(pixels, size, 12, 4, 6, 2, 200, 170, 140);
+  // Enhanced fuzzy texture with varied tones
+  // Light fluff patches
+  setPixel(pixels, size, 10, 18, ...fluffLight);
+  setPixel(pixels, size, 12, 18, ...fluffLight);
+  setPixel(pixels, size, 9, 20, ...fluffLight);
+  setPixel(pixels, size, 11, 21, ...fluffLight);
+  // Mid-tone texture
+  setPixel(pixels, size, 14, 19, ...fluffMid);
+  setPixel(pixels, size, 16, 18, ...fluffMid);
+  setPixel(pixels, size, 13, 22, ...fluffMid);
+  setPixel(pixels, size, 17, 20, ...fluffMid);
+  // Dark texture for depth
+  setPixel(pixels, size, 18, 19, ...fluffDark);
+  setPixel(pixels, size, 19, 21, ...fluffDark);
+  setPixel(pixels, size, 20, 22, ...fluffDark);
   
-  // Ears (large, pointed)
-  fillRect(pixels, size, 11, 3, 2, 3, 180, 150, 120);
-  fillRect(pixels, size, 17, 3, 2, 3, 180, 150, 120);
-  setPixel(pixels, size, 11, 2, 200, 170, 140);
-  setPixel(pixels, size, 18, 2, 200, 170, 140);
+  // === ELEGANT LONG NECK (signature alpaca feature) ===
+  // Main neck column
+  fillRect(pixels, size, 13, 9, 4, 9, ...neckMain);
   
-  // Eyes (large, gentle)
-  setPixel(pixels, size, 13, 7, 40, 30, 20);
-  setPixel(pixels, size, 16, 7, 40, 30, 20);
+  // Neck highlights (left side, light source)
+  fillRect(pixels, size, 13, 9, 1, 8, ...neckLight);
+  setPixel(pixels, size, 14, 9, ...neckLight);
+  setPixel(pixels, size, 14, 10, ...neckLight);
   
-  // Snout/muzzle
-  fillRect(pixels, size, 13, 8, 4, 2, 160, 130, 100);
+  // Neck shadows (right side)
+  fillRect(pixels, size, 16, 12, 1, 5, ...neckDark);
+  setPixel(pixels, size, 15, 16, ...neckDark);
+  setPixel(pixels, size, 15, 17, ...neckDark);
   
-  // Legs (long and slender)
-  fillRect(pixels, size, 10, 24, 2, 5, 160, 130, 100);
-  fillRect(pixels, size, 18, 24, 2, 5, 160, 130, 100);
+  // Neck-body connection (smooth transition)
+  setPixel(pixels, size, 12, 17, ...neckMain);
+  setPixel(pixels, size, 17, 17, ...neckMain);
   
-  // Fluffy tail
-  fillRect(pixels, size, 22, 18, 3, 4, 200, 170, 140);
+  // === HEAD (small, elongated alpaca head) ===
+  // Main head
+  fillRect(pixels, size, 12, 5, 6, 5, ...faceMain);
+  
+  // Head highlights (forehead)
+  fillRect(pixels, size, 12, 5, 3, 2, ...faceLight);
+  setPixel(pixels, size, 13, 7, ...faceLight);
+  
+  // Head shadows (chin and right side)
+  fillRect(pixels, size, 16, 8, 2, 2, ...faceDark);
+  setPixel(pixels, size, 17, 7, ...faceDark);
+  
+  // === FLUFFY TOP OF HEAD ===
+  fillRect(pixels, size, 11, 3, 7, 2, ...fluffMain);
+  // Head fluff highlights
+  setPixel(pixels, size, 11, 3, ...fluffLight);
+  setPixel(pixels, size, 12, 3, ...fluffLight);
+  setPixel(pixels, size, 13, 3, ...fluffLight);
+  // Head fluff texture
+  setPixel(pixels, size, 15, 4, ...fluffLight);
+  setPixel(pixels, size, 17, 4, ...fluffLight);
+  setPixel(pixels, size, 16, 3, ...fluffDark);
+  
+  // === LARGE POINTED EARS (prominent alpaca feature) ===
+  // Left ear
+  fillRect(pixels, size, 10, 2, 2, 4, ...faceMain);
+  setPixel(pixels, size, 10, 1, ...faceLight);
+  setPixel(pixels, size, 10, 2, ...faceLight);
+  setPixel(pixels, size, 11, 4, ...faceDark);
+  setPixel(pixels, size, 11, 5, ...faceDark);
+  // Left ear inner/fluff
+  setPixel(pixels, size, 11, 3, ...fluffLight);
+  
+  // Right ear
+  fillRect(pixels, size, 18, 2, 2, 4, ...faceMain);
+  setPixel(pixels, size, 19, 1, ...faceLight);
+  setPixel(pixels, size, 19, 2, ...faceLight);
+  setPixel(pixels, size, 18, 4, ...faceDark);
+  setPixel(pixels, size, 18, 5, ...faceDark);
+  // Right ear inner/fluff
+  setPixel(pixels, size, 18, 3, ...fluffLight);
+  
+  // === LARGE GENTLE EYES (expressive and kind) ===
+  // Left eye (larger, more expressive)
+  fillRect(pixels, size, 13, 7, 2, 2, ...eyeBlack);
+  // Eye shine for gentleness
+  setPixel(pixels, size, 13, 7, ...eyeShine);
+  
+  // Right eye
+  fillRect(pixels, size, 16, 7, 2, 2, ...eyeBlack);
+  // Eye shine
+  setPixel(pixels, size, 16, 7, ...eyeShine);
+  
+  // === SNOUT/MUZZLE ===
+  fillRect(pixels, size, 13, 8, 4, 2, ...faceDark);
+  // Nose
+  setPixel(pixels, size, 14, 8, ...noseDark);
+  setPixel(pixels, size, 15, 8, ...noseDark);
+  // Nostrils
+  setPixel(pixels, size, 14, 9, 60, 45, 30);
+  setPixel(pixels, size, 15, 9, 60, 45, 30);
+  
+  // === LONG SLENDER LEGS (elegant alpaca legs) ===
+  // Front left leg
+  fillRect(pixels, size, 10, 24, 2, 5, ...legMain);
+  setPixel(pixels, size, 10, 24, ...neckLight);
+  setPixel(pixels, size, 10, 25, ...neckLight);
+  setPixel(pixels, size, 11, 27, ...legDark);
+  setPixel(pixels, size, 11, 28, ...legDark);
+  
+  // Front right leg
+  fillRect(pixels, size, 18, 24, 2, 5, ...legMain);
+  setPixel(pixels, size, 18, 24, ...neckLight);
+  setPixel(pixels, size, 18, 25, ...neckLight);
+  setPixel(pixels, size, 19, 27, ...legDark);
+  setPixel(pixels, size, 19, 28, ...legDark);
+  
+  // Feet/hooves (small and neat)
+  fillRect(pixels, size, 10, 28, 2, 1, ...fluffOutline);
+  fillRect(pixels, size, 18, 28, 2, 1, ...fluffOutline);
+  
+  // === FLUFFY TAIL (enhanced prominence) ===
+  // Main tail mass
+  fillRect(pixels, size, 22, 18, 3, 5, ...fluffMain);
+  fillRect(pixels, size, 23, 19, 2, 3, ...fluffMid);
+  // Tail highlights
+  setPixel(pixels, size, 22, 18, ...fluffLight);
+  setPixel(pixels, size, 23, 19, ...fluffLight);
+  setPixel(pixels, size, 22, 19, ...fluffLight);
+  // Tail shadows
+  setPixel(pixels, size, 24, 21, ...fluffDark);
+  setPixel(pixels, size, 24, 22, ...fluffDark);
+  setPixel(pixels, size, 23, 22, ...fluffDark);
+  // Tail tuft
+  setPixel(pixels, size, 25, 19, ...fluffLight);
+  setPixel(pixels, size, 25, 20, ...fluffMid);
   
   createPNG(size, size, pixels, 'alpaca-enemy.png');
   return { name: 'alpaca-enemy', width: size, height: size, points: 30 };
