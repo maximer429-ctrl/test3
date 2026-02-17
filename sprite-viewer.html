@@ -377,6 +377,125 @@
             color: #666;
             font-style: italic;
         }
+
+        /* Atlas View Styles */
+        .atlas-view-section {
+            background: #252525;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .atlas-canvas-container {
+            position: relative;
+            display: inline-block;
+            border: 2px solid #444;
+            border-radius: 4px;
+            overflow: auto;
+            max-height: 70vh;
+            background: #1a1a1a;
+        }
+
+        #atlasCanvas {
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            cursor: crosshair;
+        }
+
+        .atlas-overlay-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .view-toggle-btn {
+            padding: 8px 16px;
+            background: #333;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: #e0e0e0;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .view-toggle-btn:hover {
+            background: #3a3a3a;
+            border-color: #555;
+        }
+
+        .view-toggle-btn.active {
+            background: #4CAF50;
+            border-color: #4CAF50;
+            color: #1a1a1a;
+        }
+
+        .atlas-controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .atlas-control-btn {
+            padding: 8px 16px;
+            background: #4CAF50;
+            border: none;
+            border-radius: 4px;
+            color: #1a1a1a;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .atlas-control-btn:hover {
+            background: #5BC663;
+        }
+
+        .atlas-control-btn:active {
+            transform: scale(0.98);
+        }
+
+        .atlas-info {
+            margin-top: 15px;
+            padding: 12px;
+            background: #2a2a2a;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .atlas-info-item {
+            margin: 4px 0;
+        }
+
+        .toggle-overlay {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toggle-overlay input[type="checkbox"] {
+            cursor: pointer;
+        }
+
+        .toggle-overlay label {
+            cursor: pointer;
+            font-size: 13px;
+            color: #e0e0e0;
+        }
     </style>
 </head>
 <body>
@@ -434,7 +553,10 @@
             zoom: 2,
             background: 'dark',
             searchTerm: '',
-            images: {} // Cache for individual sprite images
+            images: {}, // Cache for individual sprite images
+            viewMode: 'sprite', // 'sprite' or 'atlas'
+            showOverlay: true,
+            atlasZoom: 1
         };
 
         // Categories mapping
@@ -622,17 +744,142 @@
             const detailContent = document.getElementById('detailContent');
 
             if (!state.selectedSprite) {
-                detailContent.innerHTML = `
-                    <div class="empty-state">
-                        ← Select a sprite to view details
-                    </div>
-                `;
+                // Show atlas view option even without selection if in packed mode
+                if (state.atlasData.meta.mode === 'packed' && state.atlasImage) {
+                    detailContent.innerHTML = renderAtlasOnlyView();
+                    setupAtlasCanvasListeners();
+                } else {
+                    detailContent.innerHTML = `
+                        <div class="empty-state">
+                            ← Select a sprite to view details
+                        </div>
+                    `;
+                }
                 return;
             }
 
             const sprite = state.atlasData.sprites[state.selectedSprite];
             const mode = state.atlasData.meta.mode;
 
+            // Add view toggle for packed mode
+            let viewToggle = '';
+            if (mode === 'packed' && state.atlasImage) {
+                viewToggle = `
+                    <div class="view-toggle">
+                        <button class="view-toggle-btn ${state.viewMode === 'sprite' ? 'active' : ''}" 
+                                data-view="sprite">Sprite View</button>
+                        <button class="view-toggle-btn ${state.viewMode === 'atlas' ? 'active' : ''}" 
+                                data-view="atlas">Atlas View</button>
+                    </div>
+                `;
+            }
+
+            let html = viewToggle;
+
+            if (state.viewMode === 'atlas' && mode === 'packed') {
+                html += renderAtlasView();
+            } else {
+                html += renderSpriteView(sprite, mode);
+            }
+
+            detailContent.innerHTML = html;
+
+            // Setup listeners
+            if (mode === 'packed' && state.atlasImage) {
+                document.querySelectorAll('.view-toggle-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        state.viewMode = btn.dataset.view;
+                        renderDetailPanel();
+                    });
+                });
+
+                if (state.viewMode === 'atlas') {
+                    setupAtlasCanvasListeners();
+                }
+            }
+
+            // Render preview canvas for sprite view
+            if (state.viewMode === 'sprite') {
+                renderPreview();
+            }
+        }
+
+        // Render atlas-only view (when no sprite selected)
+        function renderAtlasOnlyView() {
+            const meta = state.atlasData.meta;
+            
+            return `
+                <div class="atlas-view-section">
+                    <div class="preview-header">Sprite Atlas Texture</div>
+                    <div class="atlas-canvas-container">
+                        <canvas id="atlasCanvas"></canvas>
+                        <canvas id="atlasOverlay" class="atlas-overlay-canvas"></canvas>
+                    </div>
+                    <div class="atlas-controls">
+                        <div class="control-group">
+                            <span class="control-label">Zoom:</span>
+                            <div class="zoom-buttons">
+                                <button class="zoom-btn ${state.atlasZoom === 0.5 ? 'active' : ''}" data-atlas-zoom="0.5">0.5x</button>
+                                <button class="zoom-btn ${state.atlasZoom === 1 ? 'active' : ''}" data-atlas-zoom="1">1x</button>
+                                <button class="zoom-btn ${state.atlasZoom === 2 ? 'active' : ''}" data-atlas-zoom="2">2x</button>
+                                <button class="zoom-btn ${state.atlasZoom === 4 ? 'active' : ''}" data-atlas-zoom="4">4x</button>
+                            </div>
+                        </div>
+                        <div class="toggle-overlay">
+                            <input type="checkbox" id="overlayToggle" ${state.showOverlay ? 'checked' : ''}>
+                            <label for="overlayToggle">Show Sprite Boundaries</label>
+                        </div>
+                        <button class="atlas-control-btn" onclick="exportAtlas()">📥 Export Atlas</button>
+                    </div>
+                    <div class="atlas-info">
+                        <div class="atlas-info-item">Atlas Size: ${meta.atlasWidth} × ${meta.atlasHeight} px</div>
+                        <div class="atlas-info-item">Sprites: ${Object.keys(state.atlasData.sprites).length}</div>
+                        <div class="atlas-info-item">Format: ${meta.format}</div>
+                        <div class="atlas-info-item">Click on a sprite to select it</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Render atlas view
+        function renderAtlasView() {
+            const meta = state.atlasData.meta;
+            
+            return `
+                <div class="atlas-view-section">
+                    <div class="preview-header">Atlas View - ${state.selectedSprite}</div>
+                    <div class="atlas-canvas-container">
+                        <canvas id="atlasCanvas"></canvas>
+                        <canvas id="atlasOverlay" class="atlas-overlay-canvas"></canvas>
+                    </div>
+                    <div class="atlas-controls">
+                        <div class="control-group">
+                            <span class="control-label">Zoom:</span>
+                            <div class="zoom-buttons">
+                                <button class="zoom-btn ${state.atlasZoom === 0.5 ? 'active' : ''}" data-atlas-zoom="0.5">0.5x</button>
+                                <button class="zoom-btn ${state.atlasZoom === 1 ? 'active' : ''}" data-atlas-zoom="1">1x</button>
+                                <button class="zoom-btn ${state.atlasZoom === 2 ? 'active' : ''}" data-atlas-zoom="2">2x</button>
+                                <button class="zoom-btn ${state.atlasZoom === 4 ? 'active' : ''}" data-atlas-zoom="4">4x</button>
+                            </div>
+                        </div>
+                        <div class="toggle-overlay">
+                            <input type="checkbox" id="overlayToggle" ${state.showOverlay ? 'checked' : ''}>
+                            <label for="overlayToggle">Show Sprite Boundaries</label>
+                        </div>
+                        <button class="atlas-control-btn" onclick="exportAtlas()">📥 Export Atlas</button>
+                        <button class="atlas-control-btn" onclick="exportSprite()">📥 Export Sprite</button>
+                    </div>
+                    <div class="atlas-info">
+                        <div class="atlas-info-item">Atlas Size: ${meta.atlasWidth} × ${meta.atlasHeight} px</div>
+                        <div class="atlas-info-item">Selected: ${state.selectedSprite}</div>
+                        <div class="atlas-info-item">Position: ${state.atlasData.sprites[state.selectedSprite].uv.x}, ${state.atlasData.sprites[state.selectedSprite].uv.y}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Render sprite view
+        function renderSpriteView(sprite, mode) {
             let html = `
                 <div class="preview-section">
                     <div class="preview-header">${state.selectedSprite}</div>
@@ -714,10 +961,157 @@
                 </div>
             `;
 
-            detailContent.innerHTML = html;
+            return html;
+        }
 
-            // Render preview canvas
-            renderPreview();
+        // Setup atlas canvas listeners
+        function setupAtlasCanvasListeners() {
+            const canvas = document.getElementById('atlasCanvas');
+            const overlayCanvas = document.getElementById('atlasOverlay');
+            
+            if (!canvas || !state.atlasImage) return;
+
+            // Render atlas
+            renderAtlasCanvas();
+
+            // Click to select sprite
+            canvas.addEventListener('click', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / state.atlasZoom;
+                const y = (e.clientY - rect.top) / state.atlasZoom;
+
+                // Find clicked sprite
+                for (const [spriteId, sprite] of Object.entries(state.atlasData.sprites)) {
+                    if (!sprite.uv) continue;
+                    
+                    const uv = sprite.uv;
+                    if (x >= uv.x && x < uv.x + uv.width &&
+                        y >= uv.y && y < uv.y + uv.height) {
+                        state.selectedSprite = spriteId;
+                        renderSpriteList();
+                        renderDetailPanel();
+                        break;
+                    }
+                }
+            });
+
+            // Handle zoom buttons
+            document.querySelectorAll('[data-atlas-zoom]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    state.atlasZoom = parseFloat(btn.dataset.atlasZoom);
+                    renderAtlasCanvas();
+                });
+            });
+
+            // Handle overlay toggle
+            const overlayToggle = document.getElementById('overlayToggle');
+            if (overlayToggle) {
+                overlayToggle.addEventListener('change', (e) => {
+                    state.showOverlay = e.target.checked;
+                    renderAtlasCanvas();
+                });
+            }
+        }
+
+        // Render atlas canvas
+        function renderAtlasCanvas() {
+            const canvas = document.getElementById('atlasCanvas');
+            const overlayCanvas = document.getElementById('atlasOverlay');
+            
+            if (!canvas || !state.atlasImage) return;
+
+            const ctx = canvas.getContext('2d');
+            const overlayCtx = overlayCanvas.getContext('2d');
+
+            const width = state.atlasImage.width * state.atlasZoom;
+            const height = state.atlasImage.height * state.atlasZoom;
+
+            // Set canvas sizes
+            canvas.width = width;
+            canvas.height = height;
+            overlayCanvas.width = width;
+            overlayCanvas.height = height;
+
+            // Draw atlas texture
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(state.atlasImage, 0, 0, width, height);
+
+            // Draw overlay
+            if (state.showOverlay) {
+                overlayCtx.clearRect(0, 0, width, height);
+                overlayCtx.lineWidth = 2;
+
+                for (const [spriteId, sprite] of Object.entries(state.atlasData.sprites)) {
+                    if (!sprite.uv) continue;
+
+                    const uv = sprite.uv;
+                    const x = uv.x * state.atlasZoom;
+                    const y = uv.y * state.atlasZoom;
+                    const w = uv.width * state.atlasZoom;
+                    const h = uv.height * state.atlasZoom;
+
+                    // Highlight selected sprite
+                    if (spriteId === state.selectedSprite) {
+                        overlayCtx.strokeStyle = '#4CAF50';
+                        overlayCtx.lineWidth = 3;
+                        overlayCtx.fillStyle = 'rgba(76, 175, 80, 0.2)';
+                        overlayCtx.fillRect(x, y, w, h);
+                    } else {
+                        overlayCtx.strokeStyle = 'rgba(255, 255, 0, 0.5)';
+                        overlayCtx.lineWidth = 1;
+                    }
+
+                    overlayCtx.strokeRect(x, y, w, h);
+
+                    // Draw sprite label (if zoom is high enough)
+                    if (state.atlasZoom >= 2) {
+                        overlayCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                        overlayCtx.fillRect(x, y, Math.min(w, ctx.measureText(spriteId).width + 4), 14);
+                        overlayCtx.fillStyle = '#fff';
+                        overlayCtx.font = '10px monospace';
+                        overlayCtx.fillText(spriteId, x + 2, y + 10);
+                    }
+                }
+            }
+        }
+
+        // Export functions
+        function exportAtlas() {
+            if (!state.atlasImage) return;
+
+            const link = document.createElement('a');
+            link.download = 'sprite-atlas.png';
+            link.href = state.atlasImage.src;
+            link.click();
+        }
+
+        function exportSprite() {
+            if (!state.selectedSprite) return;
+
+            const sprite = state.atlasData.sprites[state.selectedSprite];
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = sprite.width;
+            canvas.height = sprite.height;
+
+            if (state.atlasData.meta.mode === 'packed' && state.atlasImage && sprite.uv) {
+                const uv = sprite.uv;
+                ctx.drawImage(
+                    state.atlasImage,
+                    uv.x, uv.y, uv.width, uv.height,
+                    0, 0, canvas.width, canvas.height
+                );
+            }
+
+            canvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.download = `${state.selectedSprite}.png`;
+                link.href = url;
+                link.click();
+                URL.revokeObjectURL(url);
+            });
         }
 
         // Render preview
