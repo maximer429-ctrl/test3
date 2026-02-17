@@ -2,6 +2,36 @@
 
 This project uses **bd** (beads) for issue tracking. Run `bd onboard` to get started.
 
+## Development Environment
+
+**⚠️ CRITICAL: This project uses Docker for development.**
+
+**ALWAYS use Docker - NEVER start local servers (python -m http.server, etc.)**
+
+```bash
+# Start the development server (required for testing)
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Restart after code changes (usually not needed, volume-mounted)
+docker-compose restart
+
+# Stop the server
+docker-compose down
+```
+
+**Access the application:**
+- Game: http://localhost:8080/
+- Sprite Viewer: http://localhost:8080/sprite-viewer.html
+
+**Running commands inside container:**
+```bash
+docker-compose exec troupo-invaders <command>
+# Example: docker-compose exec troupo-invaders node generate-sprites.js
+```
+
 ## Quick Reference
 
 ```bash
