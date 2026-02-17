@@ -531,6 +531,135 @@
             font-size: 13px;
             color: #e0e0e0;
         }
+
+        /* Animation Controls */
+        .animation-section {
+            background: #252525;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .animation-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .animation-playback {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .play-pause-btn {
+            padding: 10px 20px;
+            background: #4CAF50;
+            border: none;
+            border-radius: 4px;
+            color: #1a1a1a;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            min-width: 80px;
+        }
+
+        .play-pause-btn:hover {
+            background: #5BC663;
+        }
+
+        .play-pause-btn.playing {
+            background: #f44336;
+        }
+
+        .play-pause-btn.playing:hover {
+            background: #e53935;
+        }
+
+        .frame-info {
+            font-size: 13px;
+            color: #aaa;
+            font-family: 'Courier New', monospace;
+        }
+
+        .frame-scrubber {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .frame-slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .frame-slider {
+            flex: 1;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .frame-slider-track {
+            height: 100%;
+            background: #4CAF50;
+            border-radius: 3px;
+            transition: width 0.1s;
+        }
+
+        .frame-slider-thumb {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 16px;
+            height: 16px;
+            background: #4CAF50;
+            border: 2px solid #1a1a1a;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: left 0.1s;
+        }
+
+        .frame-slider-thumb:hover {
+            background: #5BC663;
+            width: 18px;
+            height: 18px;
+        }
+
+        .frame-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #666;
+            font-family: 'Courier New', monospace;
+        }
+
+        .animation-info {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .animation-info-item {
+            display: flex;
+            gap: 6px;
+        }
+
+        .animation-info-label {
+            color: #666;
+        }
+
+        .animation-info-value {
+            color: #4CAF50;
+            font-family: 'Courier New', monospace;
+        }
     </style>
 </head>
 <body>
@@ -602,7 +731,12 @@
             viewMode: 'sprite', // 'sprite' or 'atlas'
             showOverlay: true,
             atlasZoom: 1,
-            showPixelGrid: false
+            showPixelGrid: false,
+            // Animation state
+            animationPlaying: false,
+            currentFrame: 0,
+            animationInterval: null,
+            animationFrameImages: {} // Cache for animation frame images
         };
 
         // Categories mapping
@@ -847,6 +981,12 @@
             // Render preview canvas for sprite view
             if (state.viewMode === 'sprite') {
                 renderPreview();
+                
+                // Setup animation controls if sprite has animation
+                const sprite = state.atlasData.sprites[state.selectedSprite];
+                if (sprite.animation && sprite.animation.frames && sprite.animation.frames.length > 0) {
+                    setupAnimationControls(sprite);
+                }
             }
         }
 
@@ -926,6 +1066,8 @@
 
         // Render sprite view
         function renderSpriteView(sprite, mode) {
+            const hasAnimation = sprite.animation && sprite.animation.frames && sprite.animation.frames.length > 0;
+            
             let html = `
                 <div class="preview-section">
                     <div class="preview-header">${state.selectedSprite}</div>
@@ -937,7 +1079,64 @@
                         </div>
                     </div>
                 </div>
+            `;
 
+            // Add animation controls if sprite has animation
+            if (hasAnimation) {
+                const anim = sprite.animation;
+                const frameCount = anim.frameCount || anim.frames.length;
+                const frameDuration = anim.fps ? (1000 / anim.fps).toFixed(0) : 'N/A';
+                
+                html += `
+                    <div class="animation-section">
+                        <div class="preview-header">Animation Controls</div>
+                        <div class="animation-controls">
+                            <div class="animation-playback">
+                                <button class="play-pause-btn" id="playPauseBtn">
+                                    ${state.animationPlaying ? '⏸ Pause' : '▶ Play'}
+                                </button>
+                                <div class="frame-info">
+                                    Frame: <span id="currentFrameDisplay">${state.currentFrame + 1}</span> / ${frameCount}
+                                </div>
+                            </div>
+                            
+                            <div class="frame-scrubber">
+                                <div class="frame-slider-container">
+                                    <div class="frame-slider" id="frameSlider">
+                                        <div class="frame-slider-track" id="frameSliderTrack"></div>
+                                        <div class="frame-slider-thumb" id="frameSliderThumb"></div>
+                                    </div>
+                                </div>
+                                <div class="frame-labels">
+                                    <span>Frame 1</span>
+                                    <span>Frame ${frameCount}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="animation-info">
+                                <div class="animation-info-item">
+                                    <span class="animation-info-label">FPS:</span>
+                                    <span class="animation-info-value">${anim.fps || 'N/A'}</span>
+                                </div>
+                                <div class="animation-info-item">
+                                    <span class="animation-info-label">Frame Duration:</span>
+                                    <span class="animation-info-value">${frameDuration}ms</span>
+                                </div>
+                                <div class="animation-info-item">
+                                    <span class="animation-info-label">Loop:</span>
+                                    <span class="animation-info-value">${anim.loop ? 'Yes' : 'No'}</span>
+                                </div>
+                                <div class="animation-info-item">
+                                    <span class="animation-info-label">Total Frames:</span>
+                                    <span class="animation-info-value">${frameCount}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += `
                 <div class="metadata-section">
                     <div class="metadata-header">Metadata</div>
                     <div class="metadata-grid">
@@ -992,7 +1191,7 @@
                 `;
             }
 
-            if (sprite.animation) {
+            if (hasAnimation) {
                 const anim = sprite.animation;
                 html += `
                     <div class="metadata-item">
@@ -1178,7 +1377,31 @@
             canvas.height = sprite.height * state.zoom;
 
             try {
-                if (mode === 'packed' && state.atlasImage && sprite.uv) {
+                // Check if sprite has animation and should display animation frame
+                const hasAnimation = sprite.animation && sprite.animation.frames && sprite.animation.frames.length > 0;
+                
+                if (hasAnimation && mode === 'individual') {
+                    // Draw animation frame
+                    const spriteId = state.selectedSprite;
+                    const frameImages = state.animationFrameImages[spriteId];
+                    
+                    if (frameImages && frameImages[state.currentFrame]) {
+                        ctx.drawImage(
+                            frameImages[state.currentFrame],
+                            0, 0, canvas.width, canvas.height
+                        );
+                    } else {
+                        // Fallback to base sprite while frames load
+                        const imgPath = `assets/${state.atlasData.meta.spritePath}${sprite.file}`;
+                        if (!state.images[state.selectedSprite]) {
+                            state.images[state.selectedSprite] = await loadImage(imgPath);
+                        }
+                        ctx.drawImage(
+                            state.images[state.selectedSprite],
+                            0, 0, canvas.width, canvas.height
+                        );
+                    }
+                } else if (mode === 'packed' && state.atlasImage && sprite.uv) {
                     // Draw from atlas
                     const uv = sprite.uv;
                     ctx.drawImage(
@@ -1187,7 +1410,7 @@
                         0, 0, canvas.width, canvas.height
                     );
                 } else if (mode === 'individual') {
-                    // Load and draw individual image
+                    // Load and draw individual image (no animation)
                     const imgPath = `assets/${state.atlasData.meta.spritePath}${sprite.file}`;
                     
                     if (!state.images[state.selectedSprite]) {
@@ -1249,6 +1472,185 @@
                 ctx.moveTo(0, yPos);
                 ctx.lineTo(gridCanvas.width, yPos);
                 ctx.stroke();
+            }
+        }
+
+        // Animation Functions
+        
+        // Setup animation controls
+        function setupAnimationControls(sprite) {
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            const frameSlider = document.getElementById('frameSlider');
+            const frameSliderThumb = document.getElementById('frameSliderThumb');
+            const frameSliderTrack = document.getElementById('frameSliderTrack');
+            
+            if (!playPauseBtn || !frameSlider) return;
+
+            // Reset animation state when sprite changes
+            stopAnimation();
+            state.currentFrame = 0;
+            updateFrameDisplay();
+
+            // Play/Pause button
+            playPauseBtn.addEventListener('click', () => {
+                if (state.animationPlaying) {
+                    stopAnimation();
+                } else {
+                    playAnimation(sprite);
+                }
+            });
+
+            // Frame slider
+            frameSlider.addEventListener('click', (e) => {
+                const rect = frameSlider.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const percent = x / rect.width;
+                const frameCount = sprite.animation.frames.length;
+                const newFrame = Math.floor(percent * frameCount);
+                
+                setAnimationFrame(Math.max(0, Math.min(newFrame, frameCount - 1)));
+            });
+
+            // Slider thumb drag
+            let isDragging = false;
+            
+            frameSliderThumb.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                e.stopPropagation();
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                
+                const rect = frameSlider.getBoundingClientRect();
+                const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+                const percent = x / rect.width;
+                const frameCount = sprite.animation.frames.length;
+                const newFrame = Math.floor(percent * frameCount);
+                
+                setAnimationFrame(Math.max(0, Math.min(newFrame, frameCount - 1)));
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+
+            // Load animation frames
+            preloadAnimationFrames(sprite);
+        }
+
+        // Preload animation frame images
+        async function preloadAnimationFrames(sprite) {
+            if (!sprite.animation || !sprite.animation.frames) return;
+
+            const spriteId = state.selectedSprite;
+            if (!state.animationFrameImages[spriteId]) {
+                state.animationFrameImages[spriteId] = [];
+            }
+
+            for (let i = 0; i < sprite.animation.frames.length; i++) {
+                const frameData = sprite.animation.frames[i];
+                const framePath = `assets/${state.atlasData.meta.spritePath}${frameData.file}`;
+                
+                try {
+                    if (!state.animationFrameImages[spriteId][i]) {
+                        state.animationFrameImages[spriteId][i] = await loadImage(framePath);
+                    }
+                } catch (error) {
+                    console.error(`Failed to load animation frame ${i} for ${spriteId}:`, error);
+                }
+            }
+        }
+
+        // Play animation
+        function playAnimation(sprite) {
+            if (state.animationPlaying) return;
+
+            state.animationPlaying = true;
+            updatePlayPauseButton();
+
+            const fps = sprite.animation.fps || 1;
+            const frameDuration = 1000 / fps;
+            const frameCount = sprite.animation.frames.length;
+            const loop = sprite.animation.loop;
+
+            state.animationInterval = setInterval(() => {
+                state.currentFrame++;
+                
+                if (state.currentFrame >= frameCount) {
+                    if (loop) {
+                        state.currentFrame = 0;
+                    } else {
+                        state.currentFrame = frameCount - 1;
+                        stopAnimation();
+                        return;
+                    }
+                }
+                
+                updateFrameDisplay();
+            }, frameDuration);
+        }
+
+        // Stop animation
+        function stopAnimation() {
+            if (state.animationInterval) {
+                clearInterval(state.animationInterval);
+                state.animationInterval = null;
+            }
+            state.animationPlaying = false;
+            updatePlayPauseButton();
+        }
+
+        // Set specific frame
+        function setAnimationFrame(frame) {
+            const sprite = state.atlasData.sprites[state.selectedSprite];
+            if (!sprite.animation) return;
+
+            const frameCount = sprite.animation.frames.length;
+            state.currentFrame = Math.max(0, Math.min(frame, frameCount - 1));
+            
+            // Stop animation when manually scrubbing
+            if (state.animationPlaying) {
+                stopAnimation();
+            }
+            
+            updateFrameDisplay();
+        }
+
+        // Update frame display
+        function updateFrameDisplay() {
+            const currentFrameDisplay = document.getElementById('currentFrameDisplay');
+            const frameSliderThumb = document.getElementById('frameSliderThumb');
+            const frameSliderTrack = document.getElementById('frameSliderTrack');
+            
+            if (currentFrameDisplay) {
+                currentFrameDisplay.textContent = state.currentFrame + 1;
+            }
+            
+            // Update slider position
+            const sprite = state.atlasData.sprites[state.selectedSprite];
+            if (sprite.animation && frameSliderThumb && frameSliderTrack) {
+                const frameCount = sprite.animation.frames.length;
+                const percent = (state.currentFrame / (frameCount - 1)) * 100;
+                frameSliderThumb.style.left = `${percent}%`;
+                frameSliderTrack.style.width = `${percent}%`;
+            }
+            
+            // Re-render preview with current frame
+            renderPreview();
+        }
+
+        // Update play/pause button
+        function updatePlayPauseButton() {
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            if (!playPauseBtn) return;
+            
+            if (state.animationPlaying) {
+                playPauseBtn.textContent = '⏸ Pause';
+                playPauseBtn.classList.add('playing');
+            } else {
+                playPauseBtn.textContent = '▶ Play';
+                playPauseBtn.classList.remove('playing');
             }
         }
 
