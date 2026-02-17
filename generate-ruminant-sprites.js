@@ -114,7 +114,7 @@ function fillRect(pixels, width, x, y, w, h, r, g, b, a = 255) {
  * Enhanced cartoon-style fluffy sheep with improved pixel art
  */
 function createSheep() {
-  const size = 30;
+  const size = 40;
   const pixels = new Uint8Array(size * size * 4);
   
   // Enhanced color palette with shading
@@ -253,7 +253,7 @@ function createSheep() {
  * Enhanced cartoon-style goat with distinctive features and improved pixel art
  */
 function createGoat() {
-  const size = 30;
+  const size = 40;
   const pixels = new Uint8Array(size * size * 4);
   
   // Enhanced color palette with shading
@@ -402,7 +402,7 @@ function createGoat() {
  * Enhanced cartoon-style elegant alpaca with fluffy texture and long neck
  */
 function createAlpaca() {
-  const size = 30;
+  const size = 40;
   const pixels = new Uint8Array(size * size * 4);
   
   // Enhanced color palette with shading

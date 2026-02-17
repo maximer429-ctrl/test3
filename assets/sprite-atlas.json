@@ -19,8 +19,8 @@
     },
     "sheep-enemy": {
       "file": "sheep-enemy.png",
-      "width": 30,
-      "height": 30,
+      "width": 40,
+      "height": 40,
       "points": 10,
       "uv": null,
       "animation": {
@@ -35,8 +35,8 @@
     },
     "goat-enemy": {
       "file": "goat-enemy.png",
-      "width": 30,
-      "height": 30,
+      "width": 40,
+      "height": 40,
       "points": 20,
       "uv": null,
       "animation": {
@@ -51,8 +51,8 @@
     },
     "alpaca-enemy": {
       "file": "alpaca-enemy.png",
-      "width": 30,
-      "height": 30,
+      "width": 40,
+      "height": 40,
       "points": 30,
       "uv": null,
       "animation": {

@@ -12,12 +12,12 @@ const CONFIG = {
     PLAYER_START_LIVES: 3,
     
     // Enemy settings
-    ENEMY_WIDTH: 30,
-    ENEMY_HEIGHT: 30,
+    ENEMY_WIDTH: 40,
+    ENEMY_HEIGHT: 40,
     ENEMY_ROWS: 5,
     ENEMY_COLS: 11,
-    ENEMY_SPACING_X: 50,
-    ENEMY_SPACING_Y: 40,
+    ENEMY_SPACING_X: 55,
+    ENEMY_SPACING_Y: 45,
     ENEMY_START_Y: 80,
     ENEMY_MOVE_SPEED: 30, // pixels per step
     ENEMY_MOVE_DELAY: 0.8, // seconds between moves
