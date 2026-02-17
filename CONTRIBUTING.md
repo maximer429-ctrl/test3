@@ -60,28 +60,18 @@ Create sprites in your favorite pixel art tool (Aseprite, Piskel, GIMP, etc.):
 
 The project includes `generate-spritesheet.js` to pack individual sprite PNGs into a single texture atlas for optimized rendering.
 
-**⚠️ IMPORTANT: Run npm commands inside Docker container**
-
-The sprite packer requires the `canvas` npm package which has native dependencies (Cairo, Pango, pixman). These must be installed in the Docker container, not on your host system.
-
 **To use the packer:**
 
 ```bash
 # Make sure Docker container is running
 docker-compose up -d
 
-# Run the packer inside the container
+# Run the packer inside the container (see README for why Docker is required)
 docker-compose exec troupo-invaders node generate-spritesheet.js
 
 # Or with npm script
 docker-compose exec troupo-invaders npm run pack-sprites
 ```
-
-**Why Docker?**
-- The canvas package requires native C++ libraries
-- Docker container has all required system dependencies pre-installed
-- Running `npm install` on host may fail without system packages (cairo-dev, pango-dev, etc.)
-- Container ensures consistent environment across different development machines
 
 **When to use the packer:**
 - When you have many sprites and want to reduce HTTP requests
