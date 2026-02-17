@@ -1,0 +1,109 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Courier New', monospace;
+    background: #000;
+    color: #0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+#game-container {
+    position: relative;
+    background: #111;
+    border: 4px solid #0f0;
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+}
+
+#game-canvas {
+    display: block;
+    background: #000;
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+
+.overlay.hidden {
+    display: none;
+}
+
+.overlay h1 {
+    font-size: 48px;
+    margin-bottom: 30px;
+    text-shadow: 0 0 10px #0f0;
+    animation: glow 2s ease-in-out infinite;
+}
+
+.overlay p {
+    font-size: 20px;
+    margin: 10px 0;
+}
+
+.controls {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.controls p {
+    font-size: 16px;
+    margin: 5px 0;
+}
+
+#hud {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 18px;
+    color: #0f0;
+    text-shadow: 0 0 5px #0f0;
+    pointer-events: none;
+    z-index: 5;
+}
+
+#hud > div {
+    padding: 5px 10px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid #0f0;
+}
+
+@keyframes glow {
+    0%, 100% {
+        text-shadow: 0 0 10px #0f0, 0 0 20px #0f0;
+    }
+    50% {
+        text-shadow: 0 0 20px #0f0, 0 0 30px #0f0, 0 0 40px #0f0;
+    }
+}
+
+@media (max-width: 900px) {
+    #game-container {
+        transform: scale(0.8);
+    }
+}
+
+@media (max-width: 700px) {
+    #game-container {
+        transform: scale(0.6);
+    }
+}

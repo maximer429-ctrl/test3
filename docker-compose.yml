@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  troupo-invaders:
+    build: .
+    container_name: troupo-invaders-dev
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    command: npx http-server . -p 8080 -c-1
+    stdin_open: true
+    tty: true

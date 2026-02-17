@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Troup'O Invaders</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="game-canvas" width="800" height="600"></canvas>
+        <div id="menu-overlay" class="overlay">
+            <h1>Troup'O Invaders</h1>
+            <p>Press SPACE to Start</p>
+            <div class="controls">
+                <p><strong>Controls:</strong></p>
+                <p>← → : Move</p>
+                <p>SPACE: Shoot</p>
+                <p>P: Pause</p>
+            </div>
+        </div>
+        <div id="game-over-overlay" class="overlay hidden">
+            <h1>Game Over</h1>
+            <p id="final-score">Score: 0</p>
+            <p id="high-score">High Score: 0</p>
+            <p>Press R to Restart</p>
+        </div>
+        <div id="hud">
+            <div id="score">Score: 0</div>
+            <div id="lives">Lives: 3</div>
+            <div id="wave">Wave: 1</div>
+        </div>
+    </div>
+
+    <!-- Game engine modules -->
+    <script src="src/utils/constants.js"></script>
+    <script src="src/core/webgl-context.js"></script>
+    <script src="src/core/shader-program.js"></script>
+    <script src="src/core/texture-manager.js"></script>
+    <script src="src/core/sprite-renderer.js"></script>
+    <script src="src/core/input-manager.js"></script>
+    <script src="src/core/collision-manager.js"></script>
+    <script src="src/core/audio-manager.js"></script>
+    
+    <!-- Game entities -->
+    <script src="src/entities/sprite.js"></script>
+    <script src="src/entities/bullet.js"></script>
+    <script src="src/entities/player.js"></script>
+    <script src="src/entities/enemy.js"></script>
+    <script src="src/entities/shield.js"></script>
+    <script src="src/entities/ufo.js"></script>
+    <script src="src/entities/particle.js"></script>
+    
+    <!-- Game systems -->
+    <script src="src/systems/score-manager.js"></script>
+    <script src="src/systems/wave-manager.js"></script>
+    <script src="src/systems/particle-system.js"></script>
+    <script src="src/systems/game-state-manager.js"></script>
+    
+    <!-- Main game loop -->
+    <script src="src/game.js"></script>
+    <script src="src/main.js"></script>
+</body>
+</html>

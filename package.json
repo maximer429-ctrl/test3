@@ -1,0 +1,20 @@
+{
+  "name": "troupo-invaders",
+  "version": "0.1.0",
+  "description": "Troup'O invaders - A Space Invaders-like game built with WebGL",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "http-server . -p 8080 -c-1",
+    "dev": "http-server . -p 8080 -c-1"
+  },
+  "keywords": [
+    "webgl",
+    "game",
+    "space-invaders"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
