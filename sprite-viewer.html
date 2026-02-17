@@ -239,6 +239,16 @@
             image-rendering: pixelated;
             image-rendering: crisp-edges;
             border: 1px solid #444;
+            position: relative;
+        }
+
+        .grid-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
         }
 
         .metadata-section {
@@ -496,6 +506,31 @@
             font-size: 13px;
             color: #e0e0e0;
         }
+
+        .custom-color-input {
+            width: 40px;
+            height: 30px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            cursor: pointer;
+            background: none;
+        }
+
+        .grid-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .grid-toggle input[type="checkbox"] {
+            cursor: pointer;
+        }
+
+        .grid-toggle label {
+            cursor: pointer;
+            font-size: 13px;
+            color: #e0e0e0;
+        }
     </style>
 </head>
 <body>
@@ -540,6 +575,15 @@
                 <button class="bg-btn active" data-bg="dark">Dark</button>
                 <button class="bg-btn" data-bg="light">Light</button>
                 <button class="bg-btn" data-bg="checker">Checker</button>
+                <button class="bg-btn" data-bg="custom">Custom</button>
+            </div>
+            <input type="color" id="customBgColor" class="custom-color-input" 
+                   value="#1a1a1a" style="display: none;">
+        </div>
+        <div class="control-group">
+            <div class="grid-toggle">
+                <input type="checkbox" id="pixelGridToggle">
+                <label for="pixelGridToggle">Pixel Grid</label>
             </div>
         </div>
     </div>
@@ -552,11 +596,13 @@
             selectedSprite: null,
             zoom: 2,
             background: 'dark',
+            customBgColor: '#1a1a1a',
             searchTerm: '',
             images: {}, // Cache for individual sprite images
             viewMode: 'sprite', // 'sprite' or 'atlas'
             showOverlay: true,
-            atlasZoom: 1
+            atlasZoom: 1,
+            showPixelGrid: false
         };
 
         // Categories mapping
@@ -883,8 +929,12 @@
             let html = `
                 <div class="preview-section">
                     <div class="preview-header">${state.selectedSprite}</div>
-                    <div class="preview-container bg-${state.background}">
-                        <canvas id="previewCanvas" class="preview-canvas"></canvas>
+                    <div class="preview-container bg-${state.background}" id="previewContainerDiv"
+                         ${state.background === 'custom' ? `style="background-color: ${state.customBgColor};"` : ''}>
+                        <div style="position: relative; display: inline-block;">
+                            <canvas id="previewCanvas" class="preview-canvas"></canvas>
+                            <canvas id="gridOverlay" class="grid-overlay"></canvas>
+                        </div>
                     </div>
                 </div>
 
@@ -1154,6 +1204,52 @@
                 ctx.fillStyle = '#ff0000';
                 ctx.fillText('Error loading sprite', 10, 20);
             }
+
+            // Render pixel grid overlay if enabled and zoom is sufficient
+            renderPixelGrid();
+        }
+
+        // Render pixel grid overlay
+        function renderPixelGrid() {
+            const gridCanvas = document.getElementById('gridOverlay');
+            if (!gridCanvas) return;
+
+            const sprite = state.atlasData.sprites[state.selectedSprite];
+            const ctx = gridCanvas.getContext('2d');
+
+            // Match preview canvas size
+            gridCanvas.width = sprite.width * state.zoom;
+            gridCanvas.height = sprite.height * state.zoom;
+
+            // Clear the grid
+            ctx.clearRect(0, 0, gridCanvas.width, gridCanvas.height);
+
+            // Only show grid if enabled and zoom is at least 4x
+            if (!state.showPixelGrid || state.zoom < 4) {
+                return;
+            }
+
+            // Draw pixel grid
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.lineWidth = 1;
+
+            // Vertical lines
+            for (let x = 0; x <= sprite.width; x++) {
+                const xPos = x * state.zoom;
+                ctx.beginPath();
+                ctx.moveTo(xPos, 0);
+                ctx.lineTo(xPos, gridCanvas.height);
+                ctx.stroke();
+            }
+
+            // Horizontal lines
+            for (let y = 0; y <= sprite.height; y++) {
+                const yPos = y * state.zoom;
+                ctx.beginPath();
+                ctx.moveTo(0, yPos);
+                ctx.lineTo(gridCanvas.width, yPos);
+                ctx.stroke();
+            }
         }
 
         // Setup event listeners
@@ -1192,13 +1288,46 @@
                     state.background = btn.dataset.bg;
                     document.querySelectorAll('.bg-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
+                    
+                    // Show/hide custom color picker
+                    const colorPicker = document.getElementById('customBgColor');
+                    if (state.background === 'custom') {
+                        colorPicker.style.display = 'inline-block';
+                    } else {
+                        colorPicker.style.display = 'none';
+                    }
+                    
                     if (state.selectedSprite) {
-                        const container = document.querySelector('.preview-container');
+                        const container = document.querySelector('#previewContainerDiv');
                         if (container) {
                             container.className = `preview-container bg-${state.background}`;
+                            if (state.background === 'custom') {
+                                container.style.backgroundColor = state.customBgColor;
+                            } else {
+                                container.style.backgroundColor = '';
+                            }
                         }
                     }
                 });
+            });
+
+            // Custom color picker
+            document.getElementById('customBgColor').addEventListener('input', (e) => {
+                state.customBgColor = e.target.value;
+                if (state.background === 'custom' && state.selectedSprite) {
+                    const container = document.querySelector('#previewContainerDiv');
+                    if (container) {
+                        container.style.backgroundColor = state.customBgColor;
+                    }
+                }
+            });
+
+            // Pixel grid toggle
+            document.getElementById('pixelGridToggle').addEventListener('change', (e) => {
+                state.showPixelGrid = e.target.checked;
+                if (state.selectedSprite) {
+                    renderPixelGrid();
+                }
             });
         }
 
