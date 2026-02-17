@@ -233,14 +233,17 @@ class Game {
         // Clear the screen
         this.webglContext.clear();
         
-        // Render test sprites
-        if (this.testSprites && this.testSprites.length > 0) {
-            this.spriteRenderer.render(this.testSprites);
+        // Only render game content when in playing state
+        if (this.gameStateManager && this.gameStateManager.isPlaying()) {
+            // Render test sprites (temporary, for development)
+            if (this.testSprites && this.testSprites.length > 0) {
+                this.spriteRenderer.render(this.testSprites);
+            }
+            
+            // TODO: Render all game entities
+            // TODO: Render particles
+            // TODO: Render UI
         }
-        
-        // TODO: Render all game entities
-        // TODO: Render particles
-        // TODO: Render UI
     }
     
     stop() {
