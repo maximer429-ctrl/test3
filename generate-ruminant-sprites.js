@@ -250,42 +250,148 @@ function createSheep() {
 
 /**
  * Create goat enemy sprite (Enemy 2 - 20 points)
- * Brown/black goat with horns
+ * Enhanced cartoon-style goat with distinctive features and improved pixel art
  */
 function createGoat() {
   const size = 30;
   const pixels = new Uint8Array(size * size * 4);
   
-  // Body (dark brown)
-  fillRect(pixels, size, 8, 14, 14, 8, 80, 60, 40);
+  // Enhanced color palette with shading
+  const bodyDark = [65, 50, 35];           // Dark brown body shadow
+  const bodyMain = [90, 70, 50];           // Main body brown
+  const bodyLight = [110, 85, 60];         // Body highlight
+  const headDark = [75, 60, 45];           // Head shadow
+  const headMain = [95, 75, 55];           // Main head color
+  const headLight = [115, 90, 65];         // Head highlight
+  const hornBase = [180, 170, 150];        // Horn base color
+  const hornLight = [220, 210, 190];       // Horn highlight
+  const hornDark = [140, 130, 110];        // Horn shadow
+  const eyeAmber = [255, 200, 50];         // Amber/yellow eyes
+  const eyeGlow = [255, 230, 120];         // Eye highlight
+  const pupilBlack = [0, 0, 0];            // Horizontal pupils
+  const beardDark = [50, 40, 30];          // Dark beard
+  const beardMid = [65, 50, 35];           // Mid beard
+  const legDark = [60, 45, 35];            // Leg shadow
+  const legMain = [75, 60, 45];            // Leg color
+  const noseDark = [50, 40, 30];           // Dark nose
   
-  // Head
-  fillRect(pixels, size, 11, 9, 8, 7, 90, 70, 50);
+  // === BODY with shading ===
+  // Main body mass
+  fillRect(pixels, size, 8, 15, 14, 8, ...bodyMain);
   
-  // Horns (curved upward)
-  fillRect(pixels, size, 10, 5, 2, 5, 200, 190, 170);
-  fillRect(pixels, size, 18, 5, 2, 5, 200, 190, 170);
-  fillRect(pixels, size, 9, 6, 2, 2, 200, 190, 170);   // Horn curve left
-  fillRect(pixels, size, 19, 6, 2, 2, 200, 190, 170);  // Horn curve right
+  // Body highlights (top-left light source)
+  fillRect(pixels, size, 8, 15, 6, 2, ...bodyLight);
+  setPixel(pixels, size, 8, 17, ...bodyLight);
+  setPixel(pixels, size, 9, 17, ...bodyLight);
+  setPixel(pixels, size, 10, 18, ...bodyLight);
   
-  // Eyes (goat eyes are distinctive)
-  fillRect(pixels, size, 12, 11, 2, 2, 255, 200, 0);   // Yellow/amber
-  fillRect(pixels, size, 16, 11, 2, 2, 255, 200, 0);
-  setPixel(pixels, size, 12, 11, 0, 0, 0);             // Horizontal pupils
-  setPixel(pixels, size, 13, 11, 0, 0, 0);
-  setPixel(pixels, size, 16, 11, 0, 0, 0);
-  setPixel(pixels, size, 17, 11, 0, 0, 0);
+  // Body shadows (bottom-right)
+  fillRect(pixels, size, 18, 20, 4, 3, ...bodyDark);
+  fillRect(pixels, size, 15, 21, 3, 2, ...bodyDark);
+  setPixel(pixels, size, 21, 19, ...bodyDark);
+  setPixel(pixels, size, 21, 18, ...bodyDark);
   
-  // Beard (distinctive goat feature)
-  fillRect(pixels, size, 13, 15, 4, 3, 60, 50, 40);
-  fillRect(pixels, size, 14, 18, 2, 2, 60, 50, 40);
+  // === HEAD with shading ===
+  // Main head
+  fillRect(pixels, size, 11, 9, 8, 7, ...headMain);
   
-  // Legs
-  fillRect(pixels, size, 10, 22, 2, 4, 70, 55, 40);
-  fillRect(pixels, size, 18, 22, 2, 4, 70, 55, 40);
+  // Head highlights (forehead and left side)
+  fillRect(pixels, size, 11, 9, 3, 2, ...headLight);
+  setPixel(pixels, size, 11, 11, ...headLight);
+  setPixel(pixels, size, 12, 11, ...headLight);
   
-  // Tail (short and pointed up)
-  fillRect(pixels, size, 21, 16, 2, 4, 80, 60, 40);
+  // Head shadows (under chin, right side)
+  fillRect(pixels, size, 16, 14, 3, 2, ...headDark);
+  setPixel(pixels, size, 17, 13, ...headDark);
+  setPixel(pixels, size, 18, 13, ...headDark);
+  
+  // === HORNS (curved upward, 3D effect) ===
+  // Left horn base and curve
+  fillRect(pixels, size, 10, 5, 2, 5, ...hornBase);
+  fillRect(pixels, size, 9, 6, 2, 3, ...hornBase);
+  fillRect(pixels, size, 8, 7, 1, 2, ...hornLight); // Curve tip
+  // Left horn shading
+  setPixel(pixels, size, 11, 5, ...hornLight);      // Inner highlight
+  setPixel(pixels, size, 11, 6, ...hornLight);
+  setPixel(pixels, size, 10, 8, ...hornDark);      // Shadow
+  setPixel(pixels, size, 9, 8, ...hornDark);
+  
+  // Right horn base and curve
+  fillRect(pixels, size, 18, 5, 2, 5, ...hornBase);
+  fillRect(pixels, size, 19, 6, 2, 3, ...hornBase);
+  fillRect(pixels, size, 21, 7, 1, 2, ...hornLight); // Curve tip
+  // Right horn shading
+  setPixel(pixels, size, 18, 5, ...hornLight);      // Inner highlight
+  setPixel(pixels, size, 18, 6, ...hornLight);
+  setPixel(pixels, size, 19, 8, ...hornDark);      // Shadow
+  setPixel(pixels, size, 20, 8, ...hornDark);
+  
+  // === DISTINCTIVE GOAT EYES (amber with horizontal pupils) ===
+  // Left eye
+  fillRect(pixels, size, 12, 11, 3, 3, ...eyeAmber);
+  // Eye glow/shine
+  setPixel(pixels, size, 12, 11, ...eyeGlow);
+  // Horizontal rectangular pupil (distinctive goat feature)
+  fillRect(pixels, size, 12, 12, 3, 1, ...pupilBlack);
+  
+  // Right eye
+  fillRect(pixels, size, 16, 11, 3, 3, ...eyeAmber);
+  // Eye glow/shine
+  setPixel(pixels, size, 16, 11, ...eyeGlow);
+  // Horizontal rectangular pupil
+  fillRect(pixels, size, 16, 12, 3, 1, ...pupilBlack);
+  
+  // === NOSE/SNOUT ===
+  fillRect(pixels, size, 13, 14, 4, 2, ...noseDark);
+  // Nostrils
+  setPixel(pixels, size, 13, 14, 0, 0, 0);
+  setPixel(pixels, size, 16, 14, 0, 0, 0);
+  
+  // === CHARACTERISTIC GOAT BEARD (enhanced with texture) ===
+  // Upper beard (wider at top)
+  fillRect(pixels, size, 12, 16, 6, 2, ...beardDark);
+  fillRect(pixels, size, 13, 18, 4, 2, ...beardDark);
+  // Beard tip (pointed)
+  fillRect(pixels, size, 14, 20, 2, 2, ...beardMid);
+  setPixel(pixels, size, 14, 22, ...beardDark);
+  setPixel(pixels, size, 15, 22, ...beardDark);
+  // Beard texture/strands
+  setPixel(pixels, size, 13, 17, ...beardMid);
+  setPixel(pixels, size, 15, 18, ...beardMid);
+  setPixel(pixels, size, 16, 17, ...beardMid);
+  
+  // === EARS (pointed, alert) ===
+  fillRect(pixels, size, 9, 9, 2, 3, ...headMain);
+  fillRect(pixels, size, 19, 9, 2, 3, ...headMain);
+  // Ear highlights
+  setPixel(pixels, size, 9, 9, ...headLight);
+  setPixel(pixels, size, 19, 9, ...headLight);
+  // Ear shadows
+  setPixel(pixels, size, 10, 11, ...headDark);
+  setPixel(pixels, size, 20, 11, ...headDark);
+  
+  // === LEGS (sturdy goat legs) ===
+  // Front legs
+  fillRect(pixels, size, 10, 23, 2, 5, ...legMain);
+  fillRect(pixels, size, 18, 23, 2, 5, ...legMain);
+  // Leg highlights
+  setPixel(pixels, size, 10, 23, ...bodyLight);
+  setPixel(pixels, size, 18, 23, ...bodyLight);
+  // Leg shadows
+  setPixel(pixels, size, 11, 26, ...legDark);
+  setPixel(pixels, size, 11, 27, ...legDark);
+  setPixel(pixels, size, 19, 26, ...legDark);
+  setPixel(pixels, size, 19, 27, ...legDark);
+  // Hooves (darker)
+  fillRect(pixels, size, 10, 27, 2, 1, 30, 25, 20);
+  fillRect(pixels, size, 18, 27, 2, 1, 30, 25, 20);
+  
+  // === TAIL (short, pointed upward - goat characteristic) ===
+  fillRect(pixels, size, 21, 16, 2, 5, ...bodyMain);
+  setPixel(pixels, size, 22, 17, ...bodyLight);
+  setPixel(pixels, size, 21, 20, ...bodyDark);
+  // Tail tuft
+  setPixel(pixels, size, 23, 16, ...beardDark);
   
   createPNG(size, size, pixels, 'goat-enemy.png');
   return { name: 'goat-enemy', width: size, height: size, points: 20 };
