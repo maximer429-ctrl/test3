@@ -109,7 +109,10 @@ class Game {
         // Initialize enemy formation
         this.enemyFormation = new EnemyFormation();
         
-        // TODO: Initialize input manager (test3-724)
+        // Initialize input manager (test3-724)
+        this.inputManager = new InputManager();
+        this.inputManager.initialize();
+        
         // TODO: Initialize collision manager (test3-5ag)
         // TODO: Initialize score manager (test3-8sm)
         
@@ -140,8 +143,11 @@ class Game {
     
     /**
      * Set up keyboard input for game state transitions
+     * This runs separately from InputManager to handle meta-game input
      */
     setupStateInput() {
+        // Note: Meta-game controls handled separately to avoid conflicts
+        // InputManager handles in-game controls (player movement, shooting)
         window.addEventListener('keydown', (event) => {
             if (!this.gameStateManager) return;
             
@@ -155,6 +161,7 @@ class Game {
                     break;
                     
                 case 'KeyP':
+                case 'Escape':
                     // Toggle pause
                     if (this.gameStateManager.isState(CONFIG.GAME_STATES.PLAYING) ||
                         this.gameStateManager.isState(CONFIG.GAME_STATES.PAUSED)) {
@@ -224,11 +231,15 @@ class Game {
             this.enemyFormation.update(deltaTime);
         }
         
-        // TODO: Update input
-        // TODO: Update player
-        // TODO: Update bullets
-        // TODO: Update collisions
-        // TODO: Update particles
+        // TODO: Update player (test3-03n) - will use inputManager.getHorizontalAxis() and inputManager.isActionTriggered('SHOOT')
+        // TODO: Update bullets (test3-966)
+        // TODO: Update collisions (test3-5ag)
+        // TODO: Update particles (test3-13u)
+        
+        // Update input manager (clear action buffer at end of frame)
+        if (this.inputManager) {
+            this.inputManager.update();
+        }
     }
     
     render() {

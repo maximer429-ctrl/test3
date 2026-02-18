@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Input Manager Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            padding: 20px;
+        }
+        h1 {
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .panel {
+            background: #2a2a2a;
+            border: 2px solid #444;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .panel h2 {
+            color: #4CAF50;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .key-display {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .key {
+            background: #333;
+            border: 2px solid #555;
+            border-radius: 4px;
+            padding: 10px 15px;
+            min-width: 60px;
+            text-align: center;
+            transition: all 0.1s;
+        }
+        .key.active {
+            background: #4CAF50;
+            border-color: #66BB6A;
+            color: white;
+            transform: scale(1.1);
+        }
+        .info {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .info-label {
+            color: #888;
+        }
+        .info-value {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .instructions {
+            background: #3a3a3a;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .instructions p {
+            margin: 5px 0;
+            color: #aaa;
+        }
+        .log {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 12px;
+        }
+        .log-entry {
+            margin: 2px 0;
+            padding: 2px 0;
+        }
+        .log-entry.press { color: #4CAF50; }
+        .log-entry.release { color: #888; }
+        .log-entry.action { color: #FFD700; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Input Manager Test</h1>
+        
+        <div class="panel">
+            <h2>Key States</h2>
+            <div class="key-display" id="keyDisplay">
+                <div class="key" data-key="ArrowLeft">← Left</div>
+                <div class="key" data-key="ArrowRight">→ Right</div>
+                <div class="key" data-key="ArrowUp">↑ Up</div>
+                <div class="key" data-key="ArrowDown">↓ Down</div>
+                <div class="key" data-key="KeyA">A</div>
+                <div class="key" data-key="KeyD">D</div>
+                <div class="key" data-key="KeyW">W</div>
+                <div class="key" data-key="KeyS">S</div>
+                <div class="key" data-key="Space">SPACE</div>
+                <div class="key" data-key="KeyP">P</div>
+                <div class="key" data-key="Escape">ESC</div>
+                <div class="key" data-key="KeyR">R</div>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2>Input State</h2>
+            <div class="info">
+                <div class="info-label">Horizontal Axis:</div>
+                <div class="info-value" id="horizontalAxis">0</div>
+                
+                <div class="info-label">Vertical Axis:</div>
+                <div class="info-value" id="verticalAxis">0</div>
+                
+                <div class="info-label">Action LEFT:</div>
+                <div class="info-value" id="actionLeft">false</div>
+                
+                <div class="info-label">Action RIGHT:</div>
+                <div class="info-value" id="actionRight">false</div>
+                
+                <div class="info-label">Action SHOOT:</div>
+                <div class="info-value" id="actionShoot">false</div>
+                
+                <div class="info-label">Pressed Keys:</div>
+                <div class="info-value" id="pressedKeys">none</div>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2>Event Log</h2>
+            <div class="log" id="eventLog"></div>
+        </div>
+        
+        <div class="instructions">
+            <p><strong>Instructions:</strong></p>
+            <p>• Press any arrow keys, WASD, SPACE, P, ESC, or R</p>
+            <p>• Watch the keys light up when pressed</p>
+            <p>• Check the axis values for movement</p>
+            <p>• Actions show combined key states</p>
+        </div>
+    </div>
+
+    <script src="src/core/input-manager.js"></script>
+    <script>
+        // Initialize InputManager
+        const inputManager = new InputManager();
+        inputManager.initialize();
+        
+        // Event log
+        const eventLog = document.getElementById('eventLog');
+        const maxLogEntries = 50;
+        
+        function addLogEntry(message, type = 'press') {
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            eventLog.insertBefore(entry, eventLog.firstChild);
+            
+            // Limit log size
+            while (eventLog.children.length > maxLogEntries) {
+                eventLog.removeChild(eventLog.lastChild);
+            }
+        }
+        
+        // Monitor key presses
+        let lastPressedKeys = new Set();
+        
+        function updateDisplay() {
+            // Update key visual states
+            document.querySelectorAll('.key').forEach(keyEl => {
+                const code = keyEl.dataset.key;
+                if (inputManager.isKeyDown(code)) {
+                    keyEl.classList.add('active');
+                } else {
+                    keyEl.classList.remove('active');
+                }
+            });
+            
+            // Update values
+            document.getElementById('horizontalAxis').textContent = inputManager.getHorizontalAxis();
+            document.getElementById('verticalAxis').textContent = inputManager.getVerticalAxis();
+            document.getElementById('actionLeft').textContent = inputManager.isActionDown('LEFT');
+            document.getElementById('actionRight').textContent = inputManager.isActionDown('RIGHT');
+            document.getElementById('actionShoot').textContent = inputManager.isActionDown('SHOOT');
+            
+            // Update pressed keys
+            const debug = inputManager.getDebugInfo();
+            document.getElementById('pressedKeys').textContent = 
+                debug.pressedKeys.length > 0 ? debug.pressedKeys.join(', ') : 'none';
+            
+            // Log new key presses
+            const currentPressed = new Set(debug.pressedKeys);
+            currentPressed.forEach(key => {
+                if (!lastPressedKeys.has(key)) {
+                    addLogEntry(`Key pressed: ${key}`, 'press');
+                }
+            });
+            lastPressedKeys.forEach(key => {
+                if (!currentPressed.has(key)) {
+                    addLogEntry(`Key released: ${key}`, 'release');
+                }
+            });
+            lastPressedKeys = currentPressed;
+            
+            // Check for actions
+            if (inputManager.isActionTriggeredByName('SHOOT')) {
+                addLogEntry('Action: SHOOT triggered!', 'action');
+            }
+            
+            // Update input manager
+            inputManager.update();
+            
+            requestAnimationFrame(updateDisplay);
+        }
+        
+        // Start update loop
+        updateDisplay();
+        
+        addLogEntry('Input Manager initialized - start pressing keys!', 'press');
+    </script>
+</body>
+</html>

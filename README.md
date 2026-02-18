@@ -6,6 +6,7 @@ A Space Invaders-like game built with WebGL, featuring adorable ruminant invader
 
 - **Game**: http://localhost:8080 (main game)
 - **Sprite Viewer**: http://localhost:8080/sprite-viewer.html (sprite development tool)
+- **Input Tester**: http://localhost:8080/input-test.html (input debugging tool)
 - **Issue Tracking**: Use `bd` commands (see AGENTS.md)
 
 ## Development Setup
